@@ -1,0 +1,16 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>上班鼓励器 · 视觉核验</title></head><body><div id="root"></div><script type="module">
+// Visual QA only: a frozen clock and in-memory storage, so real data is never touched.
+// Query: ?theme=glass&color=blue&appearance=dark&at=2026-11-05T14:32:08%2B08:00&settings={"salaryMode":"monthly"}
+const query = new URLSearchParams(location.search);
+const anchor = new window.Date(query.get('at') || '2026-11-05T14:32:08+08:00').getTime();
+const RealDate = window.Date;
+window.Date = class extends RealDate { constructor(...args) { super(...(args.length ? args : [anchor])); } static now() { return anchor; } };
+const sandbox = new Map();
+const look = { theme: query.get('theme'), themeColor: query.get('color'), appearance: query.get('appearance') };
+const settings = { ...JSON.parse(query.get('settings') || '{}'), ...Object.fromEntries(Object.entries(look).filter(([, value]) => value)) };
+sandbox.set('work-cheer-v1', JSON.stringify({ version: 1, settings, records: JSON.parse(query.get('records') || '{}') }));
+// ?desktop=1 stubs the Windows app's window API so the drawn title bar can be checked.
+if (query.has('desktop')) window.workCheerWindow = { minimize() {}, toggleMaximize() {}, close() {}, floating() {}, menu() {}, onMaximizedChange() { return () => {}; } };
+Object.defineProperty(window, 'localStorage', { value: { getItem: k => sandbox.get(k) ?? null, setItem: (k,v) => sandbox.set(k,v), removeItem:k=>sandbox.delete(k) }});
+await import('/src/main.jsx');
+</script></body></html>

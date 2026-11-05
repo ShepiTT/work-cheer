@@ -1,0 +1,75 @@
+/* Wallpaper is the user's real desktop, not an image embedded in the widget.
+ * Apple language — the capsule is a Live Activity pill, the ring an activity ring, the transparent
+ * style lock-screen type — painted in the look chosen in 设置 → 外观: surface, text, accent and
+ * light/dark all come from the same tokens as the main window (themes.css on <html>). */
+:root{color-scheme:light!important}
+html,body{margin:0!important;padding:0!important;min-width:0!important;width:100%;height:100%;overflow:hidden!important;background:transparent!important}
+#root{display:none!important}
+body{font-family:"Noto Sans SC","Segoe UI","Microsoft YaHei",sans-serif;-webkit-app-region:no-drag;user-select:none}
+.floating-widget,.floating-widget *{box-sizing:border-box;-webkit-app-region:no-drag;user-select:none;cursor:move}
+.floating-widget{--float-surface:var(--card,#FFFFFF);--float-text:var(--text,#1D1D1F);--float-muted:var(--muted,#6E6E73);--float-accent:var(--accent,#007AFF);--float-accent-2:var(--accent-2,#32ADE6);--float-accent-text:var(--accent-text,#0062CC);--float-edge:var(--line,rgb(0 0 0/.08));--float-halo:0 0 1px rgb(255 255 255/.9),0 0 12px rgb(255 255 255/.75);width:100%;height:100%;position:relative;overflow:hidden;font-synthesis:none;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+/* Glass cannot blur the desktop behind a window, so it is a nearly opaque sheet with a hint of the colour */
+[data-style="glass"] .floating-widget{--float-surface:rgb(255 255 255/.9);--float-edge:var(--edge);--float-sheen:linear-gradient(135deg,color-mix(in srgb,var(--accent) 16%,transparent),transparent 60%)}
+[data-style="glass"][data-scheme="dark"] .floating-widget{--float-surface:rgb(30 30 36/.9)}
+[data-scheme="dark"] .floating-widget{--float-halo:0 1px 3px rgb(0 0 0/.4),0 0 16px rgb(0 0 0/.25)}
+.float-face{position:relative;width:100%;height:100%;-webkit-app-region:no-drag}
+.float-metric{min-width:0;display:flex;white-space:nowrap}
+.float-label{display:inline-flex;align-items:center;gap:5px;flex-shrink:0;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.04em;color:var(--float-muted)}
+.float-live{width:6px;height:6px;flex-shrink:0;border-radius:50%;background:var(--float-accent)}
+.floating-widget:not([data-live="on"]) .float-live{background:currentColor;opacity:.5}
+.floating-widget[data-live="on"] .float-live{animation:float-live 2s ease-in-out infinite}
+@keyframes float-live{50%{opacity:.35}}
+.float-money,.float-time{white-space:nowrap;line-height:1.1}
+.float-money{font-weight:650;letter-spacing:-.01em;color:var(--float-text)}
+.float-currency{margin-right:2px;font-size:.62em;font-weight:600}
+.float-currency,.float-decimal{color:var(--float-muted)}
+.float-decimal{font-size:.78em}
+.float-time{font-weight:650;letter-spacing:.01em}
+.float-ring,.float-progress{display:none}
+
+/* 极简胶囊: a Live Activity pill — progress ring leading, countdown trailing in the accent */
+body[data-floating-style="capsule"] .floating-widget{padding:4px}
+body[data-floating-style="capsule"] .float-face{display:flex;align-items:center;gap:12px;padding:0 22px 0 14px;border-radius:28px;background:var(--float-sheen,none),var(--float-surface);box-shadow:inset 0 0 0 1px var(--float-edge),0 2px 6px rgb(0 0 0/.18);color:var(--float-text)}
+body[data-floating-style="capsule"] .float-progress{display:block;order:-1;flex-shrink:0;width:30px;height:30px;border-radius:50%;background:conic-gradient(var(--float-accent) calc(var(--progress,0) * 360deg),color-mix(in srgb,var(--float-accent) 22%,transparent) 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4.5px))}
+body[data-floating-style="capsule"] .float-progress i{display:none}
+body[data-floating-style="capsule"] .float-metric{flex-direction:column;justify-content:center;gap:1px}
+body[data-floating-style="capsule"] .float-money-group{flex:1}
+body[data-floating-style="capsule"] .float-time-group{align-items:flex-end}
+body[data-floating-style="capsule"] .float-label{font-size:10.5px}
+body[data-floating-style="capsule"] .float-live{display:none}
+body[data-floating-style="capsule"] .float-money,body[data-floating-style="capsule"] .float-time{font-size:22px}
+body[data-floating-style="capsule"] .float-time{color:var(--float-accent-text)}
+body[data-floating-style="capsule"] .large-amount .float-money{font-size:19px}
+body[data-floating-style="capsule"] .very-large-amount .float-money{font-size:16px}
+
+/* 透明悬字: lock-screen type on the wallpaper — ink with a light halo in light looks, white with a shadow in dark */
+body[data-floating-style="transparent"] .float-face{display:flex;flex-direction:column;justify-content:center;gap:8px;padding:12px 16px;color:var(--float-text);text-shadow:var(--float-halo)}
+body[data-floating-style="transparent"] .float-metric{flex-direction:column;gap:2px}
+body[data-floating-style="transparent"] .float-label,body[data-floating-style="transparent"] .float-currency,body[data-floating-style="transparent"] .float-decimal{color:color-mix(in srgb,var(--float-text) 82%,transparent)}
+body[data-floating-style="transparent"] .float-label{font-size:13px;line-height:18px}
+body[data-floating-style="transparent"] .float-live{width:7px;height:7px}
+body[data-floating-style="transparent"] .float-money{font-size:58px;line-height:1;font-weight:700;letter-spacing:-.02em}
+body[data-floating-style="transparent"] .float-currency{margin-right:4px;font-size:.42em}
+body[data-floating-style="transparent"] .float-decimal{font-size:.55em}
+body[data-floating-style="transparent"] .large-amount .float-money{font-size:44px}
+body[data-floating-style="transparent"] .very-large-amount .float-money{font-size:34px}
+body[data-floating-style="transparent"] .float-time-group{flex-direction:row;align-items:baseline;gap:8px}
+body[data-floating-style="transparent"] .float-time{font-size:22px}
+body[data-floating-style="transparent"] .float-progress{display:block;height:5px;margin-top:2px;overflow:hidden;border-radius:3px;background:color-mix(in srgb,var(--float-text) 24%,transparent)}
+body[data-floating-style="transparent"] .float-progress i{display:block;height:100%;border-radius:3px;background:var(--float-accent);transform:scaleX(var(--progress,0));transform-origin:left center;transition:transform .3s linear}
+
+/* 倒计时圆环: an activity ring on a dial in the theme's surface; the canvas painter reads these colours */
+body[data-floating-style="ring"] .floating-widget{padding:10px}
+body[data-floating-style="ring"] .float-face{width:180px;height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border-radius:50%;background:var(--float-sheen,none),var(--float-surface);box-shadow:inset 0 0 0 1px var(--float-edge),0 3px 8px rgb(0 0 0/.2);color:var(--float-text)}
+body[data-floating-style="ring"] .float-ring{display:block;position:absolute;inset:0;width:180px;height:180px;pointer-events:none}
+body[data-floating-style="ring"] .float-metric{position:relative;flex-direction:column;align-items:center;gap:2px}
+body[data-floating-style="ring"] .float-time-group{order:0}
+body[data-floating-style="ring"] .float-money-group{order:1}
+body[data-floating-style="ring"] .float-label{font-size:10.5px;line-height:13px}
+body[data-floating-style="ring"] .float-live{display:none}
+body[data-floating-style="ring"] .float-time{font-size:28px;font-weight:700}
+body[data-floating-style="ring"] .float-money{font-size:16px;color:var(--float-accent-text)}
+body[data-floating-style="ring"] .large-amount .float-money{font-size:14px}
+body[data-floating-style="ring"] .very-large-amount .float-money{font-size:12px}
+
+@media(prefers-reduced-motion:reduce){.floating-widget *{animation:none!important;transition:none!important}}

@@ -1,0 +1,32 @@
+name: Web build and tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: work/work-cheer/package-lock.json
+      - name: Install web dependencies
+        run: npm --prefix work/work-cheer ci
+      - name: Build and test
+        run: npm test
+      - name: Package offline HTML
+        run: node work/work-cheer/scripts/package-offline.mjs
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: work-cheer-offline-web
+          path: outputs/上班鼓励器/
+          if-no-files-found: error

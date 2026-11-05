@@ -1,0 +1,17 @@
+{
+  "name": "work-cheer-repository",
+  "version": "1.8.0",
+  "private": true,
+  "description": "上班鼓励器：网页与 Windows 桌面版",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "setup": "npm --prefix work/work-cheer ci && npm --prefix work/work-cheer-desktop ci",
+    "dev": "npm --prefix work/work-cheer run dev -- --host 127.0.0.1 --port 4173",
+    "build:web": "npm --prefix work/work-cheer run build",
+    "test": "npm run build:web && node --test work/work-cheer/tests/calculator.test.mjs work/work-cheer/tests/sites-worker.test.mjs",
+    "build:offline": "npm run build:web && node work/work-cheer/scripts/package-offline.mjs",
+    "build:desktop": "npm run build:offline && npm --prefix work/work-cheer-desktop run build",
+    "smoke:desktop": "node work/work-cheer-desktop/smoke-runner.cjs"
+  }
+}

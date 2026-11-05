@@ -1,0 +1,59 @@
+{
+  "name": "work-cheer-desktop",
+  "version": "1.8.0",
+  "description": "上班鼓励器 Windows 桌面版：离线收入估算和下班倒计时",
+  "main": "main.cjs",
+  "author": "Work Cheer",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "prepare-app": "node prepare.cjs",
+    "start": "electron .",
+    "build": "node prepare.cjs && electron-builder --win portable --x64"
+  },
+  "devDependencies": {
+    "@phosphor-icons/core": "2.1.1",
+    "electron": "45.2.1",
+    "electron-builder": "26.18.0",
+    "sharp": "0.35.5"
+  },
+  "build": {
+    "appId": "com.workcheer.app",
+    "productName": "上班鼓励器",
+    "copyright": "Copyright © 2026 Work Cheer",
+    "asar": true,
+    "electronDist": "node_modules/electron/dist",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.cjs",
+      "floating.css",
+      "floating-renderer.cjs",
+      "floating-preload.cjs",
+      "window-preload.cjs",
+      "smoke-floating.cjs",
+      "renderer.html",
+      "assets/icon.png",
+      "LICENSE.txt",
+      "THIRD_PARTY_NOTICES.txt",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "artifactName": "上班鼓励器-${version}-Windows-${arch}.${ext}",
+      "signExecutable": false
+    },
+    "portable": {
+      "requestExecutionLevel": "user"
+    }
+  }
+}

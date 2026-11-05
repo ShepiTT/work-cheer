@@ -1,0 +1,54 @@
+/* Look tokens. Attribute selectors (not :root) so <html> and any preview element
+ * carrying data-style / data-scheme / data-color get a complete, independent set.
+ * Text ≥ 4.5:1 on every surface; button labels ≥ 4.5:1 on their fills. */
+
+/* 纸墨: warm paper and ink; the canvas takes a faint tint of the chosen colour */
+[data-style="zhimo"]{color-scheme:light;--canvas:color-mix(in oklab,#ECE9E2 93%,var(--accent));--bg-image:none;--card:#FBFAF6;--sheet:#FBFAF6;--raised:#F3F0E9;--fill:#F0ECE4;--text:#1E1C19;--muted:#66615A;--faint:#A49D92;--line:#E3DED4;--field:#FFFFFF;--field-border:#CFC8BC;--danger:#B42318;--shadow-rgb:52 40 24;--button:var(--text);--button-text:var(--card)}
+[data-style="zhimo"][data-scheme="dark"]{color-scheme:dark;--canvas:color-mix(in oklab,#11100E 94%,var(--accent));--card:#1A1916;--sheet:#1A1916;--raised:#23211D;--fill:#23211D;--text:#EFEBE3;--muted:#A69F94;--faint:#6B655C;--line:#2E2B26;--field:#211F1B;--field-border:#3D3933;--danger:#FF8F7E;--shadow-rgb:0 0 0}
+
+/* 玻璃: frosted sheets over a soft wallpaper painted from the chosen colour */
+[data-style="glass"]{color-scheme:light;--canvas:#EEF0F6;--bg-image:radial-gradient(55% 45% at 8% 4%,color-mix(in oklab,var(--accent) 80%,white),transparent 70%),radial-gradient(50% 42% at 96% 22%,color-mix(in oklab,var(--accent-2) 75%,white),transparent 70%),radial-gradient(60% 50% at 18% 96%,color-mix(in oklab,var(--accent-2) 45%,#FFD9E8),transparent 72%),radial-gradient(65% 55% at 88% 98%,color-mix(in oklab,var(--accent) 60%,#E9DDFF),transparent 72%),linear-gradient(160deg,#F6F7FB,#E6E9F2);--card:rgb(255 255 255/.52);--sheet:rgb(250 250 252/.88);--raised:rgb(255 255 255/.55);--fill:rgb(118 118 128/.12);--text:#1D1D1F;--muted:#55555A;--faint:rgb(60 60 67/.3);--line:rgb(60 60 67/.12);--field:rgb(255 255 255/.8);--field-border:rgb(60 60 67/.18);--edge:rgb(255 255 255/.72);--highlight:rgb(255 255 255/.95);--danger:#C4291C;--shadow-rgb:40 40 80;--button:var(--accent-button);--button-text:var(--on-accent)}
+[data-style="glass"][data-scheme="dark"]{color-scheme:dark;--canvas:#06060A;--bg-image:radial-gradient(55% 45% at 8% 4%,color-mix(in oklab,var(--accent) 70%,black),transparent 70%),radial-gradient(50% 42% at 96% 22%,color-mix(in oklab,var(--accent-2) 55%,black),transparent 70%),radial-gradient(60% 50% at 18% 96%,color-mix(in oklab,var(--accent-2) 35%,#1B0E2A),transparent 72%),radial-gradient(65% 55% at 88% 98%,color-mix(in oklab,var(--accent) 45%,#120A24),transparent 72%),linear-gradient(160deg,#0C0C13,#040406);--card:rgb(30 30 36/.5);--sheet:rgb(28 28 32/.9);--raised:rgb(255 255 255/.07);--fill:rgb(118 118 128/.24);--text:#F5F5F7;--muted:#A1A1A6;--faint:rgb(235 235 245/.3);--line:rgb(255 255 255/.1);--field:rgb(255 255 255/.08);--field-border:rgb(255 255 255/.16);--edge:rgb(255 255 255/.14);--highlight:rgb(255 255 255/.2);--danger:#FF8F7E;--shadow-rgb:0 0 0}
+
+/* 小组件: iOS grouped background with white (or graphite) widgets */
+[data-style="widgets"]{color-scheme:light;--canvas:#F2F2F7;--bg-image:none;--card:#FFFFFF;--sheet:#F2F2F7;--raised:#F2F2F7;--fill:rgb(118 118 128/.12);--text:#1D1D1F;--muted:#6E6E73;--faint:#C7C7CC;--line:#E5E5EA;--field:#FFFFFF;--field-border:#D1D1D6;--danger:#C4291C;--shadow-rgb:0 0 0;--button:var(--accent-button);--button-text:var(--on-accent)}
+[data-style="widgets"][data-scheme="dark"]{color-scheme:dark;--canvas:#000000;--card:#1C1C1E;--sheet:#1C1C1E;--raised:#2C2C2E;--fill:rgb(118 118 128/.24);--text:#F5F5F7;--muted:#98989F;--faint:#48484A;--line:#38383A;--field:#2C2C2E;--field-border:#3A3A3C;--danger:#FF8F7E}
+
+/* Derived from whatever accent and surface the element ended up with */
+[data-style]{--accent-soft:color-mix(in srgb,var(--accent) 17%,var(--card));--focus:var(--accent)}
+
+/* Colours for 玻璃 and 小组件: Apple system colours; buttons deepened where white text needs it */
+[data-color="blue"]{--accent:#007AFF;--accent-2:#32ADE6;--accent-text:#0062CC;--accent-button:#0071E3;--on-accent:#FFFFFF}
+[data-color="purple"]{--accent:#AF52DE;--accent-2:#FF2D55;--accent-text:#8E3EB8;--accent-button:#9A3FCF;--on-accent:#FFFFFF}
+[data-color="pink"]{--accent:#FF2D55;--accent-2:#FF9500;--accent-text:#C8103A;--accent-button:#D9184A;--on-accent:#FFFFFF}
+[data-color="red"]{--accent:#FF3B30;--accent-2:#FF9500;--accent-text:#C81E14;--accent-button:#D92D20;--on-accent:#FFFFFF}
+[data-color="orange"]{--accent:#FF9500;--accent-2:#FFCC00;--accent-text:#A44A00;--accent-button:#FF9500;--on-accent:#1D1D1F}
+[data-color="yellow"]{--accent:#FFCC00;--accent-2:#FF9500;--accent-text:#7D6300;--accent-button:#FFCC00;--on-accent:#1D1D1F}
+[data-color="green"]{--accent:#34C759;--accent-2:#00C7BE;--accent-text:#1F7A36;--accent-button:#34C759;--on-accent:#1D1D1F}
+[data-color="graphite"]{--accent:#8E8E93;--accent-2:#AEAEB2;--accent-text:#5B5B60;--accent-button:#6E6E73;--on-accent:#FFFFFF}
+[data-scheme="dark"][data-color="blue"]{--accent:#0A84FF;--accent-2:#64D2FF;--accent-text:#409CFF}
+[data-scheme="dark"][data-color="purple"]{--accent:#BF5AF2;--accent-2:#FF375F;--accent-text:#DA8FFF}
+[data-scheme="dark"][data-color="pink"]{--accent:#FF375F;--accent-2:#FF9F0A;--accent-text:#FF6482}
+[data-scheme="dark"][data-color="red"]{--accent:#FF453A;--accent-2:#FF9F0A;--accent-text:#FF6961}
+[data-scheme="dark"][data-color="orange"]{--accent:#FF9F0A;--accent-2:#FFD60A;--accent-text:#FFB340;--accent-button:#FF9F0A}
+[data-scheme="dark"][data-color="yellow"]{--accent:#FFD60A;--accent-2:#FF9F0A;--accent-text:#FFD426;--accent-button:#FFD60A}
+[data-scheme="dark"][data-color="green"]{--accent:#30D158;--accent-2:#63E6E2;--accent-text:#30DB5B;--accent-button:#30D158}
+[data-scheme="dark"][data-color="graphite"]{--accent:#98989D;--accent-2:#636366;--accent-text:#AEAEB2;--accent-button:#98989D;--on-accent:#1D1D1F}
+
+/* Colours for 纸墨: mineral pigments that sit quietly on paper */
+[data-style="zhimo"][data-color="blue"]{--accent:#2F5D9E;--accent-2:#6B8CC0;--accent-text:#2F5D9E;--on-accent:#FFFFFF}
+[data-style="zhimo"][data-color="purple"]{--accent:#6550C0;--accent-2:#9A8AD8;--accent-text:#5A47B0;--on-accent:#FFFFFF}
+[data-style="zhimo"][data-color="pink"]{--accent:#BB3B62;--accent-2:#D9849C;--accent-text:#AA3459;--on-accent:#FFFFFF}
+[data-style="zhimo"][data-color="red"]{--accent:#C8432A;--accent-2:#DB8A6E;--accent-text:#B23A23;--on-accent:#FFFFFF}
+[data-style="zhimo"][data-color="orange"]{--accent:#A85A16;--accent-2:#C98B4E;--accent-text:#9A5214;--on-accent:#FFFFFF}
+[data-style="zhimo"][data-color="yellow"]{--accent:#8F6E0E;--accent-2:#C2A04A;--accent-text:#7D6000;--on-accent:#FFFFFF}
+[data-style="zhimo"][data-color="green"]{--accent:#2C7A68;--accent-2:#6BA796;--accent-text:#26695A;--on-accent:#FFFFFF}
+[data-style="zhimo"][data-color="graphite"]{--accent:#5B5650;--accent-2:#958E84;--accent-text:#5B5650;--on-accent:#FFFFFF}
+[data-style="zhimo"][data-scheme="dark"][data-color="blue"]{--accent:#7FA7E8;--accent-text:#9DBCF0;--on-accent:#1A1916}
+[data-style="zhimo"][data-scheme="dark"][data-color="purple"]{--accent:#A493F0;--accent-text:#B9ABF5;--on-accent:#1A1916}
+[data-style="zhimo"][data-scheme="dark"][data-color="pink"]{--accent:#F07FA0;--accent-text:#F59AB5;--on-accent:#1A1916}
+[data-style="zhimo"][data-scheme="dark"][data-color="red"]{--accent:#FF6B4A;--accent-text:#FF8A6E;--on-accent:#1A1916}
+[data-style="zhimo"][data-scheme="dark"][data-color="orange"]{--accent:#F0A238;--accent-text:#F5B65E;--on-accent:#1A1916}
+[data-style="zhimo"][data-scheme="dark"][data-color="yellow"]{--accent:#E6B422;--accent-text:#EEC54E;--on-accent:#1A1916}
+[data-style="zhimo"][data-scheme="dark"][data-color="green"]{--accent:#6CD0A2;--accent-text:#8ADBB5;--on-accent:#1A1916}
+[data-style="zhimo"][data-scheme="dark"][data-color="graphite"]{--accent:#A69F94;--accent-text:#BDB7AD;--on-accent:#1A1916}
