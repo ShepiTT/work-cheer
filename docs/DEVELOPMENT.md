@@ -90,3 +90,15 @@ python work/work-cheer-desktop/make-seal-svg.py /path/to/NotoSansSC-VF.ttf
 先构建并检查最终 EXE，再生成 Windows ZIP 和离线网页 ZIP，保留许可与校验值，最后创建 GitHub Release。不要向 Git 提交 EXE、依赖目录、测试 profile 或个人资料。只改桌面时，不自动发布原 Sites 网站。
 
 用户本机的交付副本不属于公共仓库内容；更新本机入口和清理旧文件需要遵循当前用户指示。贡献者请先阅读各工程的 AGENTS.md，并按自己机器的目录调整路径。
+
+
+## 1.9.0 轻量版构建
+
+Windows x64，需要 .NET Framework 4.8、Node.js 和系统 Edge WebView2。源码内附 WebView2 SDK 1.0.4314.35 的构建组件和许可。先在仓库根目录执行 `npm run setup`、`npm run build:offline`，再运行：
+
+```powershell
+powershell -File work/work-cheer-lite/build.ps1
+node work/work-cheer-lite/smoke-lite.cjs
+```
+
+轻量版使用 `%APPDATA%/WorkCheerLite`，完整版使用 `%APPDATA%/WorkCheer`。自动检查使用独立测试数据；人工鼠标操作验收仍待确认。完整版 EXE 102704230 字节，轻量版 EXE 1707520 字节；这些数字不包括系统共享运行时占用。

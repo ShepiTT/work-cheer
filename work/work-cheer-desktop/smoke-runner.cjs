@@ -2,7 +2,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {spawn}=require('node:child_process');
 const crypto=require('node:crypto');
-const executable=path.resolve(__dirname,'dist/上班鼓励器-1.8.0-Windows-x64.exe');
+const executable=path.resolve(__dirname,'dist/上班鼓励器-1.9.0-Windows-x64.exe');
 const profile=fs.mkdtempSync(path.join(__dirname,'portable-profile-'));
 fs.writeFileSync(path.join(profile,'desktop-preferences.json'),JSON.stringify({opacity:100,alwaysOnTop:false,closeToTray:false,floating:true,floatingBounds:{x:40,y:60,width:320,height:156}}));
 const executableHash=()=>crypto.createHash('sha256').update(fs.readFileSync(executable)).digest('hex');

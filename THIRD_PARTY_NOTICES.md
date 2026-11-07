@@ -12,3 +12,5 @@
 字体是可变字体子集，源码包含其 OFL 许可；更新子集或修改字体时继续遵守相应条件。字体和图标的许可证不会变成本项目对上游作者的专门授权书，也不代表上游作者为本项目背书。
 
 离线网页打包脚本把字体及参考项目许可写入 HTML，同时复制可读许可文件。Windows 的 prepare 脚本收集第三方声明；重新分发软件时保留发布包中的这些文件。
+
+轻量版内含 Microsoft WebView2 SDK 1.0.4314.35 组件，其 [LICENSE](work/third_party/microsoft.web.webview2.1.0.4314.35/extracted/LICENSE.txt) 与 [NOTICE](work/third_party/microsoft.web.webview2.1.0.4314.35/extracted/NOTICE.txt) 随源码及发布包保留。

@@ -20,3 +20,8 @@ work/work-cheer-desktop/native-drag-*/
 work/work-cheer-desktop/smoke-*.json
 work/work-cheer-desktop/smoke-*.png
 work/work-cheer-desktop/smoke-*/
+
+work/work-cheer-lite/obj/
+work/work-cheer-lite/qa/
+work/work-cheer-lite/smoke-*/
+work/work-cheer-lite/smoke-*.json

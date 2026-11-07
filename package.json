@@ -1,10 +1,12 @@
 {
   "name": "work-cheer-repository",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "private": true,
   "description": "上班鼓励器：网页与 Windows 桌面版",
   "license": "MIT",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "setup": "npm --prefix work/work-cheer ci && npm --prefix work/work-cheer-desktop ci",
     "dev": "npm --prefix work/work-cheer run dev -- --host 127.0.0.1 --port 4173",

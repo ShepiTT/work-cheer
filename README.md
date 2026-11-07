@@ -17,15 +17,18 @@
 
 ## 下载与使用
 
-当前版本：**1.8.0**。
+当前版本：**1.9.0**。
 
 | 版本 | 下载 | 使用方式 |
 | --- | --- | --- |
-| Windows 10/11 x64 | [Windows 便携版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.8.0/work-cheer-1.8.0-windows-x64.zip) | 解压后运行 `上班鼓励器-1.8.0-Windows-x64.exe`，免安装 |
-| 单文件离线网页 | [离线网页版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.8.0/work-cheer-1.8.0-offline-web.zip) | 解压后用浏览器打开 `上班鼓励器.html` |
+| Windows 完整版 | [完整版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.9.0/work-cheer-1.9.0-windows-full-x64.zip) | EXE 102.7 MB，自带 Electron 内核，解压运行 |
+| Windows 轻量版 | [轻量版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.9.0/work-cheer-1.9.0-windows-lite-x64.zip) | EXE 1.7 MB，依赖系统 Edge WebView2 和 .NET Framework 4.8，解压运行 |
+| 单文件离线网页 | [离线网页版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.9.0/work-cheer-1.9.0-offline-web.zip) | 解压后用浏览器打开 `上班鼓励器.html` |
 | 源码 | [下载源码](https://github.com/ShepiTT/work-cheer/archive/refs/heads/main.zip) | 参考下方本地开发步骤 |
 
-下载文件的 SHA-256 校验值见 [Release 附件](https://github.com/ShepiTT/work-cheer/releases/tag/v1.8.0)。Windows 版为未签名便携软件；软件运行无需联网，也不需要注册账户。
+两个 Windows 版本均为 x64。轻量版复用主界面，悬浮窗采用原生绘制；自动检查已通过，真实鼠标拖动、缩放、菜单与托盘仍待用户试用。轻量版首次启动尝试复制完整版数据，之后各自保存、不自动同步。
+
+下载文件的 SHA-256 校验值见 [Release 附件](https://github.com/ShepiTT/work-cheer/releases/tag/v1.9.0)。Windows 版为未签名便携软件；软件运行无需联网，也不需要注册账户。
 
 1. 打开设置，填写日薪或月薪、上下班时间和午休安排。
 2. 按公司实际情况检查工作日历；国家放假和调休补班可自动纳入，也可以手动改单个日期。
@@ -106,6 +109,8 @@ npm run smoke:desktop    # 用独立测试资料目录检查最终 EXE
 work/
   work-cheer/            React 网页、计算规则、日历、主题、测试
   work-cheer-desktop/    Electron 窗口、悬浮窗、托盘、打包
+  work-cheer-lite/       C# + WebView2 轻量版
+  third_party/          WebView2 SDK 构建组件及许可
 docs/
   images/               README 界面图片
   DEVELOPMENT.md        构建顺序、数据兼容和验证边界
