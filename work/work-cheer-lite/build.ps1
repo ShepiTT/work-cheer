@@ -2,7 +2,7 @@
 # Needs only what Windows ships (the .NET Framework 4.8 C# compiler) plus Node for tools\prepare.cjs.
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
-$version = '1.9.0'
+$version = '1.10.0'
 $sdk = (Resolve-Path (Join-Path $root '..\third_party\microsoft.web.webview2.1.0.4314.35\extracted')).Path
 $obj = Join-Path $root 'obj'
 $dist = Join-Path $root 'dist'

@@ -14,3 +14,5 @@
 离线网页打包脚本把字体及参考项目许可写入 HTML，同时复制可读许可文件。Windows 的 prepare 脚本收集第三方声明；重新分发软件时保留发布包中的这些文件。
 
 轻量版内含 Microsoft WebView2 SDK 1.0.4314.35 组件，其 [LICENSE](work/third_party/microsoft.web.webview2.1.0.4314.35/extracted/LICENSE.txt) 与 [NOTICE](work/third_party/microsoft.web.webview2.1.0.4314.35/extracted/NOTICE.txt) 随源码及发布包保留。
+
+1.10.0 的 Work Cheer Pixel 和 Work Cheer LCD 数字字体由本项目从字形代码自绘，采用项目 MIT 许可；对应生成脚本为 `work/work-cheer/scripts/make-display-fonts.py`。

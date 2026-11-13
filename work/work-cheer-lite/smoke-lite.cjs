@@ -6,7 +6,7 @@ const crypto = require('node:crypto');
 const { spawnSync } = require('node:child_process');
 
 const root = __dirname;
-const exe = path.join(root, 'dist', '上班鼓励器-轻量版-1.9.0.exe');
+const exe = path.join(root, 'dist', '上班鼓励器-轻量版-1.10.0.exe');
 const electron = path.resolve(root, '../work-cheer-desktop/node_modules/electron/dist/electron.exe');
 const work = fs.mkdtempSync(path.join(root, 'smoke-'));
 const source = path.join(work, 'full-edition');

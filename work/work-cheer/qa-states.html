@@ -1,0 +1,37 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><title>上班鼓励器 · 状态总览</title>
+<style>
+@font-face{font-family:"Noto Sans SC";font-weight:100 900;src:url("/fonts/noto-sans-sc.woff2") format("woff2")}
+body{margin:0;background:#E4E1DA;font-family:"Noto Sans SC",sans-serif}
+.grid{display:flex;flex-wrap:wrap;gap:18px 14px;padding:22px 20px}
+figure{margin:0}
+.frame{overflow:hidden;border-radius:14px;box-shadow:0 1px 3px rgb(0 0 0/.12)}
+iframe{border:0;transform-origin:0 0}
+figcaption{margin-top:8px;font-size:13px;color:#3A3732;text-align:center;letter-spacing:.08em}
+</style></head><body><div class="grid" id="grid"></div>
+<script type="module">
+// Visual QA: one 主题 in every state the card can be in, each rendered by qa.html.
+// ?theme=<style>  ?color=<id>  ?appearance=light|dark  ?width=620|375|320 (frame width)  ?scale=.4  ?only=<state,state>
+const query = new URLSearchParams(location.search);
+const theme = query.get('theme') || 'glass', color = query.get('color') || 'blue', appearance = query.get('appearance') || 'light';
+const width = Number(query.get('width')) || 620, height = Number(query.get('height')) || 940, scale = Number(query.get('scale')) || .4;
+const day = '2026-11-05', at = time => `${day}T${time}+08:00`;
+const states = [
+  ['working', '上班中', { at: at('14:32:08') }],
+  ['before', '待上班', { at: at('07:30:00') }],
+  ['break', '午休中', { at: at('12:10:00'), settings: { breakEnabled: true, breakStart: '12:00', breakEnd: '13:00' } }],
+  ['paused', '已暂停', { at: at('15:00:00'), records: { [day]: { excludedMs: 0, pausedAt: new Date(at('14:40:00')).getTime(), resetAt: null } } }],
+  ['finished', '已下班', { at: at('18:30:00') }],
+  ['off', '休息日', { at: '2026-11-07T10:00:00+08:00' }],
+  ['goal', '目标未达成 · 长名字', { at: at('09:10:00'), settings: { goalName: '一顿很贵很贵的日料自助晚餐呀', goalAmount: 500 } }],
+  ['monthly', '月薪 · 五位数', { at: at('14:32:08'), settings: { salaryMode: 'monthly', monthlySalary: 600000 } }],
+  ['large', '六位数', { at: at('16:59:00'), settings: { dailySalary: 999999 } }],
+  ['huge', '七位数', { at: at('18:30:00'), settings: { dailySalary: 1000000 } }],
+];
+const only = (query.get('only') || '').split(',').filter(Boolean);
+document.getElementById('grid').innerHTML = states.filter(([id]) => !only.length || only.includes(id)).map(([id, label, state]) => {
+  const params = new URLSearchParams({ theme, color, appearance, at: state.at });
+  if (state.settings) params.set('settings', JSON.stringify(state.settings));
+  if (state.records) params.set('records', JSON.stringify(state.records));
+  return `<figure><div class="frame" style="width:${width * scale}px;height:${height * scale}px"><iframe src="/qa.html?${params}" title="${label}" style="width:${width}px;height:${height}px;transform:scale(${scale})"></iframe></div><figcaption>${label}</figcaption></figure>`;
+}).join('');
+</script></body></html>

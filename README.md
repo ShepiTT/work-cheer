@@ -17,30 +17,32 @@
 
 ## 下载与使用
 
-当前版本：**1.9.0**。
+当前版本：**1.10.0**。
 
 | 版本 | 下载 | 使用方式 |
 | --- | --- | --- |
-| Windows 完整版 | [完整版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.9.0/work-cheer-1.9.0-windows-full-x64.zip) | EXE 102.7 MB，自带 Electron 内核，解压运行 |
-| Windows 轻量版 | [轻量版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.9.0/work-cheer-1.9.0-windows-lite-x64.zip) | EXE 1.7 MB，依赖系统 Edge WebView2 和 .NET Framework 4.8，解压运行 |
-| 单文件离线网页 | [离线网页版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.9.0/work-cheer-1.9.0-offline-web.zip) | 解压后用浏览器打开 `上班鼓励器.html` |
+| Windows 完整版 | [完整版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.10.0/work-cheer-1.10.0-windows-full-x64.zip) | EXE 102.8 MB，自带 Electron 内核，解压运行 |
+| Windows 轻量版 | [轻量版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.10.0/work-cheer-1.10.0-windows-lite-x64.zip) | EXE 1.8 MB，依赖系统 Edge WebView2 和 .NET Framework 4.8，解压运行 |
+| 单文件离线网页 | [离线网页版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.10.0/work-cheer-1.10.0-offline-web.zip) | 解压后用浏览器打开 `上班鼓励器.html` |
 | 源码 | [下载源码](https://github.com/ShepiTT/work-cheer/archive/refs/heads/main.zip) | 参考下方本地开发步骤 |
 
 两个 Windows 版本均为 x64。轻量版复用主界面，悬浮窗采用原生绘制；自动检查已通过，真实鼠标拖动、缩放、菜单与托盘仍待用户试用。轻量版首次启动尝试复制完整版数据，之后各自保存、不自动同步。
 
-下载文件的 SHA-256 校验值见 [Release 附件](https://github.com/ShepiTT/work-cheer/releases/tag/v1.9.0)。Windows 版为未签名便携软件；软件运行无需联网，也不需要注册账户。
+下载文件的 SHA-256 校验值见 [Release 附件](https://github.com/ShepiTT/work-cheer/releases/tag/v1.10.0)。Windows 版为未签名便携软件；软件运行无需联网，也不需要注册账户。
 
 1. 打开设置，填写日薪或月薪、上下班时间和午休安排。
 2. 按公司实际情况检查工作日历；国家放假和调休补班可自动纳入，也可以手动改单个日期。
 3. Windows 版点击右上角的悬浮窗按钮，让收入和倒计时留在桌面上。
 
+升级前先从托盘或右上角 ⋯ 菜单退出旧版，再打开新版；工资、记录和悬浮窗位置会沿用。旧版仍在运行时，双击新版会唤回旧窗口。
+
 ## 界面预览
 
-### 三种主题，每种都有自己的布局
+### 八种主题，每种都有自己的布局
 
-**玻璃**用磨砂卡片和彩色背景；**小组件**采用模块布局和活动圆环；**纸墨**保留纸面留白与墨色文字。主题之外，可以独立选择蓝、紫、粉、红、橙、黄、绿、石墨八种颜色，以及浅色、深色或跟随系统。
+**玻璃**用磨砂卡片和彩色背景；**小组件**采用模块布局和活动圆环；**纸墨**保留纸面留白与墨色文字。1.10.0 新增 **像素**（点阵数字与八位机边框）、**赛博朋克**（霓虹切角面板）、**千禧**（上世纪末的灰色窗口）、**黏土**（柔软圆润的立体控件）和 **液晶**（数码管数字与发光屏）。主题之外，可以独立选择蓝、紫、粉、红、橙、黄、绿、石墨八种颜色，以及浅色、深色或跟随系统。
 
-![玻璃、小组件、纸墨的浅色与深色界面](docs/images/themes.png)
+![八套主题的浅色与深色界面](docs/images/themes.png)
 
 ### 桌面悬浮窗，只留下两件事
 
@@ -70,7 +72,7 @@
 | 小目标 | 设置电影、咖啡等目标金额，查看今天的积累可以换来什么 |
 | 暂停和重置 | 暂停期间不累计收入，倒计时继续；重置只影响当天 |
 | 放假与调休 | 内置 2026 年中国大陆官方安排，支持单日手动覆盖 |
-| 外观 | 三种主题 × 八种颜色，支持浅色、深色和自动 |
+| 外观 | 八种主题 × 八种颜色，支持浅色、深色和自动 |
 | Windows 交互 | 三款悬浮窗、自绘标题栏、托盘、置顶、透明度、位置记忆 |
 | 本地保存 | 工资、作息和记录保存在当前浏览器或本机账户，无云端同步 |
 

@@ -1,6 +1,6 @@
 # 开发说明
 
-当前基线为 1.8.0，包含 React 网页与 Electron Windows 便携版。两个应用保留独立的锁文件，根目录 package.json 仅提供便捷命令，不会发布到 npm。
+当前基线为 1.10.0，包含 React 网页、Electron 完整版与 WebView2 轻量版。两个应用保留独立的锁文件，根目录 package.json 仅提供便捷命令，不会发布到 npm。
 
 ## 安装与构建
 
@@ -31,7 +31,7 @@ npm run dev
 - `src/Settings.jsx`：工资、作息、日历和外观设置。
 - `src/calculator.js`：工时与收入规则；日历优先级为手动 > 官方 > 每周规律。
 - `src/holidays.js`：已内置的官方年份与日期；当前为 2026，不推测未内置年份。
-- `src/themes.js` / `themes.css`：玻璃、小组件、纸墨 × 八种颜色 × 外观，包含旧设置迁移。
+- `src/themes.js` / `themes.css`：八套主题（玻璃、小组件、纸墨、像素、赛博朋克、千禧、黏土、液晶）× 八种颜色 × 外观，包含旧设置迁移。
 - 桌面 `main.cjs`：窗口、托盘、模式切换、菜单、边界和受限 IPC。
 - 桌面 `floating-preload.cjs`：可信 pointer 输入及拖动捕获，不向网页暴露通用 IPC。
 - 桌面 `window-preload.cjs`：只向完整界面开放固定的窗口动作。
@@ -92,7 +92,7 @@ python work/work-cheer-desktop/make-seal-svg.py /path/to/NotoSansSC-VF.ttf
 用户本机的交付副本不属于公共仓库内容；更新本机入口和清理旧文件需要遵循当前用户指示。贡献者请先阅读各工程的 AGENTS.md，并按自己机器的目录调整路径。
 
 
-## 1.9.0 轻量版构建
+## 轻量版构建
 
 Windows x64，需要 .NET Framework 4.8、Node.js 和系统 Edge WebView2。源码内附 WebView2 SDK 1.0.4314.35 的构建组件和许可。先在仓库根目录执行 `npm run setup`、`npm run build:offline`，再运行：
 
@@ -101,4 +101,9 @@ powershell -File work/work-cheer-lite/build.ps1
 node work/work-cheer-lite/smoke-lite.cjs
 ```
 
-轻量版使用 `%APPDATA%/WorkCheerLite`，完整版使用 `%APPDATA%/WorkCheer`。自动检查使用独立测试数据；人工鼠标操作验收仍待确认。完整版 EXE 102704230 字节，轻量版 EXE 1707520 字节；这些数字不包括系统共享运行时占用。
+轻量版使用 `%APPDATA%/WorkCheerLite`，完整版使用 `%APPDATA%/WorkCheer`。自动检查使用独立测试数据；人工鼠标操作验收仍待确认。1.10.0 完整版 EXE 102758946 字节，轻量版 EXE 1781248 字节；这些数字不包括系统共享运行时占用。
+
+
+## 1.10.0 新主题
+
+新增样式集中在 `work/work-cheer/src/styles-more.css`；颜色 token 仍在 `themes.css`。像素、液晶数字字体由 `scripts/make-display-fonts.py` 自绘（需 fontTools、brotli），生成的 WOFF2 已随源码提供，常规构建无需重新生成。主题预览还可使用 `/qa-states.html?theme=pixel&width=375`，或 `/qa-themes.html?styles=pixel,cyber,y2k,clay,lcd&appearance=dark`。

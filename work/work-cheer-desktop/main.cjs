@@ -1,7 +1,7 @@
 const {app, BrowserWindow, Menu, session, dialog, screen, Tray, nativeImage, ipcMain} = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
-const VERSION = '1.9.0';
+const VERSION = '1.10.0';
 const mountFloating = require('./floating-renderer.cjs');
 const floatingStyles = {
   capsule:{label:'极简胶囊',width:360,height:64},

@@ -10,7 +10,7 @@ const TABS = ['工资与作息', '工作日历', '外观'];
 /** A miniature of one 主题, painted with its real tokens in the chosen colour and appearance. */
 function StylePreview({ style, color, scheme }) {
   return <span className="style-preview" data-style={style} data-color={color} data-scheme={scheme} aria-hidden="true">
-    <span className="mini-card"><span className="mini-top"><i className="mini-seal"/><b>¥86</b></span><span className="mini-cells"><i className="on"/><i className="on"/><i className="on"/><i/></span></span>
+    <span className="mini-card"><span className="mini-top"><i className="mini-seal"/><b><em>¥</em>86</b></span><span className="mini-cells"><i className="on"/><i className="on"/><i className="on"/><i/></span></span>
     <span className="mini-tile"><i className="mini-ring"/></span>
   </span>;
 }

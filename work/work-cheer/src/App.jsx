@@ -130,23 +130,23 @@ export function App() {
     {desktopWindow && <WindowBar/>}
     <article className="work-card" aria-labelledby="app-title">
       <header className="card-header"><div className="brand"><span className="seal" aria-hidden="true">励</span><h1 id="app-title">上班鼓励器</h1></div><button className="settings-button" onClick={() => setModal('settings')}><GearSix size={17}/><span>设置</span></button></header>
-      <div className="date-row"><time dateTime={now.toISOString()}>{now.getMonth() + 1}月{now.getDate()}日<span className="weekday">周{WEEKDAYS[now.getDay()]}</span></time><span className="clock">{now.toLocaleTimeString('zh-CN', { hour12: false })}</span><span className={'status ' + stats.status}><i aria-hidden="true"/>{labels[stats.status]}</span></div>
+      <div className="date-row"><time dateTime={now.toISOString()}>{now.getMonth() + 1}月{now.getDate()}日<span className="weekday">周{WEEKDAYS[now.getDay()]}</span></time><span className="clock" data-ghost="88:88:88">{now.toLocaleTimeString('zh-CN', { hour12: false })}</span><span className={'status ' + stats.status}><i aria-hidden="true"/>{labels[stats.status]}</span></div>
       <section className="income-section" aria-label="今日收入"><p className="eyebrow">今日已赚</p>
-        <div className={'income' + (stats.earned >= 1000000 ? ' very-large-amount' : stats.earned >= 10000 ? ' large-amount' : '')}><span className="currency">¥</span><span className="income-value"><span className="income-whole">{whole}</span><span className="income-fraction">.{fraction}</span></span></div>
+        <div className={'income' + (whole.length > 6 ? ' very-large-amount' : whole.length > 4 ? ' large-amount' : '')}><span className="currency">¥</span><span className="income-value"><span className="income-whole" data-ghost={whole.replace(/\d/g, '8')}>{whole}</span><span className="income-fraction" data-ghost=".8888">.{fraction}</span></span></div>
         <p className="rate">{stats.status === 'working' ? <>每秒 <strong>+¥{stats.secondRate.toFixed(4)}</strong></> : rateNotes[stats.status]}</p>
         {settings.salaryMode === 'monthly' && <p className="salary-basis">月薪 ¥{money(settings.monthlySalary)} · 本月 {stats.monthWorkdays} 个工作日</p>}
       </section>
       <section className="time-section" aria-label="下班倒计时">
         <div className="time-head"><div className="time-main"><p className="eyebrow">{stats.status === 'off' ? '今天不用赶时间' : stats.status === 'finished' ? '今天的工作已结束' : '距离下班还有'}</p>
-          {stats.status === 'off' ? <div className="countdown rest">享受你的休息日<Coffee size={26}/></div> : stats.status === 'finished' ? <div className="countdown finished-text">下班啦，生活继续</div> : <div className="countdown"><span>{countdown.hours}</span><small>小时</small><span>{countdown.minutes.toString().padStart(2, '0')}</span><small>分</small><span>{countdown.seconds.toString().padStart(2, '0')}</span><small>秒</small></div>}
-        </div>{stats.status !== 'off' && <p className="day-percent" aria-hidden="true">{progress.toFixed(1)}<small>%</small></p>}</div>
+          {stats.status === 'off' ? <div className="countdown rest">享受你的休息日<Coffee size={26}/></div> : stats.status === 'finished' ? <div className="countdown finished-text">下班啦，生活继续</div> : <div className="countdown"><span data-ghost={String(countdown.hours).replace(/\d/g, '8')}>{countdown.hours}</span><small>小时</small><span data-ghost="88">{countdown.minutes.toString().padStart(2, '0')}</span><small>分</small><span data-ghost="88">{countdown.seconds.toString().padStart(2, '0')}</span><small>秒</small></div>}
+        </div>{stats.status !== 'off' && <p className="day-percent" data-ghost={progress.toFixed(1).replace(/\d/g, '8')} aria-hidden="true">{progress.toFixed(1)}<small>%</small></p>}</div>
         {stats.status !== 'off' && <><HourCells workedMs={stats.workedMs} totalMs={stats.totalMs} percent={progress}/>
         <div className="day-scale"><span>{settings.startTime}</span><span className="hours">已工作 <strong>{(stats.workedMs / HOUR).toFixed(2)}</strong> / {(stats.totalMs / HOUR).toFixed(2)} 小时</span><span>{settings.endTime}</span></div></>}
       </section>
       <Rings work={Math.min(100, progress)} goal={stats.status === 'off' ? 0 : goalPercent}/>
       <section className={'goal' + (goalReached ? ' reached' : '')} aria-label="今日小目标">
         <div className="goal-head"><span className="goal-name">{goalReached && <Check size={14} weight="bold"/>}小目标 · <b>{settings.goalName}</b></span>{stats.status !== 'off' && <span className="goal-amount">¥{money(Math.min(stats.earned, settings.goalAmount))} / ¥{money(settings.goalAmount)}</span>}</div>
-        {stats.status !== 'off' && <div className="goal-track" aria-hidden="true"><span style={{ transform: `scaleX(${goalPercent / 100})` }}/></div>}
+        {stats.status !== 'off' && <div className="goal-track" aria-hidden="true"><span style={{ '--goal': goalPercent / 100 }}/></div>}
         <p className="encouragement">{encouragement}</p>
       </section>
       <div className="timer-controls"><button className="primary-button" onClick={toggleTimer} disabled={!canPause}>{stats.status === 'paused' ? <Play size={18} weight="fill"/> : canPause ? <Pause size={18} weight="fill"/> : null}{stats.status === 'paused' ? '继续计时' : stats.status === 'off' ? '今天好好休息' : stats.status === 'finished' ? '今天辛苦了' : stats.status === 'before' ? '到点自动开始计时' : '暂停计时'}</button><button className="reset-button" onClick={() => setModal('reset')} aria-label="重置今日计时" title="重置今日计时"><ArrowCounterClockwise size={16}/>重置</button></div>

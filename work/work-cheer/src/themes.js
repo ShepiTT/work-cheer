@@ -1,12 +1,18 @@
 /**
  * Look = 主题 (a layout and material) × 颜色 (accent) × 外观 (light, dark or auto).
- * Tokens live in themes.css; structure per 主题 lives in styles.css.
+ * Tokens live in themes.css; structure per 主题 lives in styles.css (玻璃, 小组件, 纸墨) and
+ * styles-more.css (the 1.10 themes: 像素, 赛博朋克, 千禧, 黏土, 液晶).
  * The optional-theme idea comes from WizzenH/xindong (MIT): https://github.com/WizzenH/xindong
  */
 export const STYLES = [
   { id: 'glass', name: '玻璃', description: '通透磨砂，轻盈有层次' },
   { id: 'widgets', name: '小组件', description: '方块排布，一眼看全' },
   { id: 'zhimo', name: '纸墨', description: '纸面留白，安静克制' },
+  { id: 'pixel', name: '像素', description: '八位机画风，上班像闯关' },
+  { id: 'cyber', name: '赛博朋克', description: '霓虹切角，夜里会发光' },
+  { id: 'y2k', name: '千禧', description: '灰色老窗口，梦回机房' },
+  { id: 'clay', name: '黏土', description: '圆润软糯，像捏出来的' },
+  { id: 'lcd', name: '液晶', description: '数码管跳字，像计价器' },
 ];
 export const COLORS = [
   { id: 'blue', name: '蓝' }, { id: 'purple', name: '紫' }, { id: 'pink', name: '粉' }, { id: 'red', name: '红' },
