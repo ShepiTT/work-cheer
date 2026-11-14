@@ -10,14 +10,14 @@ using System.Windows.Forms;
 [assembly: AssemblyProduct("上班鼓励器")]
 [assembly: AssemblyDescription("实时收入估算与下班倒计时（WebView2 轻量版）")]
 [assembly: AssemblyCopyright("Copyright © 2026 Work Cheer")]
-[assembly: AssemblyVersion("1.10.0.0")]
-[assembly: AssemblyFileVersion("1.10.0.0")]
+[assembly: AssemblyVersion("1.12.0.0")]
+[assembly: AssemblyFileVersion("1.12.0.0")]
 
 namespace WorkCheerLite
 {
     static class Program
     {
-        public const string Version = "1.10.0";
+        public const string Version = "1.12.0";
         public static readonly Dictionary<string, string> Args = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         static readonly Dictionary<string, Assembly> embedded = new Dictionary<string, Assembly>();
 

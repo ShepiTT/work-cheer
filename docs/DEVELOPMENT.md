@@ -1,6 +1,6 @@
 # 开发说明
 
-当前基线为 1.10.0，包含 React 网页、Electron 完整版与 WebView2 轻量版。两个应用保留独立的锁文件，根目录 package.json 仅提供便捷命令，不会发布到 npm。
+当前基线为 1.12.0，包含 React 网页、Electron 完整版与 WebView2 轻量版。两个应用保留独立的锁文件，根目录 package.json 仅提供便捷命令，不会发布到 npm。
 
 ## 安装与构建
 
@@ -18,7 +18,7 @@ npm run dev
 | `npm test` | 先构建网页及 Sites 适配文件，再执行两组 Node 检查 |
 | `npm run build:web` | `work/work-cheer/dist/client`、`dist/server`、`dist/.openai` |
 | `npm run build:offline` | 根目录 `outputs/上班鼓励器.html` 和带授权的 `outputs/上班鼓励器` 文件夹 |
-| `npm run build:desktop` | 先生成离线网页，再生成 `work/work-cheer-desktop/dist/上班鼓励器-1.8.0-Windows-x64.exe` |
+| `npm run build:desktop` | 先生成离线网页，再生成 `work/work-cheer-desktop/dist/上班鼓励器-1.12.0-Windows-x64.exe` |
 | `npm run smoke:desktop` | 检查最终便携包，输出桌面工程内 `smoke-portable-*.json` |
 
 桌面 `prepare.cjs` 读取 `../../outputs/上班鼓励器.html`，所以不能跳过离线输入生成，也不要把桌面目录单独挪走。生成的 renderer.html、图标和 dist 不进入 Git。仅改浮窗时可复用离线输入，再到桌面工程运行 `npm run build`。
@@ -101,9 +101,16 @@ powershell -File work/work-cheer-lite/build.ps1
 node work/work-cheer-lite/smoke-lite.cjs
 ```
 
-轻量版使用 `%APPDATA%/WorkCheerLite`，完整版使用 `%APPDATA%/WorkCheer`。自动检查使用独立测试数据；人工鼠标操作验收仍待确认。1.10.0 完整版 EXE 102758946 字节，轻量版 EXE 1781248 字节；这些数字不包括系统共享运行时占用。
+轻量版使用 `%APPDATA%/WorkCheerLite`，完整版使用 `%APPDATA%/WorkCheer`。自动检查使用独立测试数据；人工鼠标操作验收仍待确认。1.12.0 完整版 EXE 102719832 字节，轻量版 EXE 1827840 字节；这些数字不包括系统共享运行时占用。
 
 
 ## 1.10.0 新主题
 
 新增样式集中在 `work/work-cheer/src/styles-more.css`；颜色 token 仍在 `themes.css`。像素、液晶数字字体由 `scripts/make-display-fonts.py` 自绘（需 fontTools、brotli），生成的 WOFF2 已随源码提供，常规构建无需重新生成。主题预览还可使用 `/qa-states.html?theme=pixel&width=375`，或 `/qa-themes.html?styles=pixel,cyber,y2k,clay,lcd&appearance=dark`。
+
+
+## 1.12.0 独立悬浮窗主题
+
+原生偏好 `floatingTheme`：空字符串表示跟随主窗口，否则为八套主题之一（glass/widgets/zhimo/pixel/cyber/y2k/clay/lcd）。完整版 `mountFloating(style, theme)` 用根节点主题属性和 MutationObserver 保持独立外观；轻量版在隐藏探针上读取所选主题的 sRGB token，主页面本身的外观不变。颜色及浅深外观仍跟随主窗口。
+
+五套新增主题的完整版画法在 `floating.css` / `floating-renderer.cjs`；轻量版在 `FloatThemes.cs`，两边同时维护。轻量版所需像素、液晶 TTF 数字字体在 `work/work-cheer-lite/fonts/`，构建时嵌入 EXE；由网页的 `scripts/make-display-fonts.py` 自绘生成。检查覆盖 8 主题 × 3 样式、跟随主窗口及重启恢复，人工操作确认单独记录。

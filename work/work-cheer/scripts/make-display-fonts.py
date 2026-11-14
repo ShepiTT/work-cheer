@@ -3,8 +3,9 @@
 Usage: python scripts/make-display-fonts.py [preview-dir]
 Writes public/fonts/wc-pixel.woff2 (arcade dot-matrix numerals) and public/fonts/wc-lcd.woff2
 (seven-segment numerals). Both are drawn here from scratch for this project, so they carry the
-project's own licence and need no third-party notice. With a preview-dir, plain .ttf copies are
-written there too (for rendering checks). Needs fontTools and brotli (../../fontdeps is used
+project's own licence and need no third-party notice. Plain .ttf copies go to
+../work-cheer-lite/fonts/ (embedded in the lite EXE, whose GDI+ cannot read WOFF2) and, with a
+preview-dir, there too (for rendering checks). Needs fontTools and brotli (../../fontdeps is used
 when present, like subset-font.py).
 """
 from pathlib import Path
@@ -24,6 +25,8 @@ from fontTools.pens.ttGlyphPen import TTGlyphPen  # noqa: E402
 UPM = 1000
 OUT = ROOT / 'public' / 'fonts'
 PREVIEW = Path(sys.argv[1]) if len(sys.argv) > 1 else None
+# The lite Windows edition draws its floating widget with GDI+, which needs plain TrueType files.
+LITE = ROOT.parent / 'work-cheer-lite' / 'fonts' if (ROOT.parent / 'work-cheer-lite').exists() else None
 
 # ---------------------------------------------------------------- 像素: 7×7 arcade numerals
 # One em is ten pixels (7 cap rows, 1 descender row, 2 rows of leading), so a font-size that is a
@@ -113,9 +116,10 @@ def build(family, glyphs, metrics, cmap, ascent, descent, filename):
     # A fixed timestamp keeps the output byte-identical between runs.
     builder.updateHead(created=3876595200, modified=3876595200)
     builder.font.recalcTimestamp = False
-    if PREVIEW:
-        PREVIEW.mkdir(parents=True, exist_ok=True)
-        builder.font.save(PREVIEW / (filename + '.ttf'))
+    for folder in (PREVIEW, LITE):
+        if folder:
+            folder.mkdir(parents=True, exist_ok=True)
+            builder.font.save(folder / (filename + '.ttf'))
     builder.font.flavor = 'woff2'
     target = OUT / (filename + '.woff2')
     builder.font.save(target)

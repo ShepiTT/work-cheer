@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.Core;
 
@@ -99,6 +100,26 @@ namespace WorkCheerLite
             Float.ShowStyle(style, Prefs.FloatPositions.TryGetValue(style, out saved) ? (Point?)saved : null);
         }
 
+        /// 1.12: picks the widget's own 主题 ("" follows the main window) and shows the widget, like picking a style.
+        /// The page measures the new look first, so the widget is never shown in the old one.
+        public async Task PickTheme(string id)
+        {
+            Prefs.FloatingTheme = Array.IndexOf(Prefs.Themes, id) >= 0 ? id : "";
+            SaveSoon();
+            if (Main.PageReady)
+            {
+                try
+                {
+                    var data = await Main.ApplyFloatTheme(Prefs.FloatingTheme);
+                    if (data != null) OnFloatData(data);
+                }
+                catch (Exception error) { PageError("widget theme: " + error.Message); }
+            }
+            SwitchMode(true, null);
+        }
+
+        async void ClickTheme(string id) { await PickTheme(id); }
+
         public void ShowCurrent()
         {
             if (floating) { Float.Show(); Float.Repaint(true); if (!Program.Smoke) Float.Activate(); }
@@ -177,6 +198,19 @@ namespace WorkCheerLite
                 styles.DropDownItems.Add(entry);
             }
             items.Add(styles);
+            var themes = new ToolStripMenuItem("悬浮窗主题");
+            var follow = Item("跟随主窗口", delegate { ClickTheme(""); });
+            follow.Checked = Prefs.FloatingTheme == "";
+            themes.DropDownItems.Add(follow);
+            themes.DropDownItems.Add(new ToolStripSeparator());
+            for (var i = 0; i < Prefs.Themes.Length; i++)
+            {
+                var theme = Prefs.Themes[i];
+                var entry = Item(Prefs.ThemeNames[i], delegate { ClickTheme(theme); });
+                entry.Checked = Prefs.FloatingTheme == theme;
+                themes.DropDownItems.Add(entry);
+            }
+            items.Add(themes);
             if (kind == "float")
             {
                 items.Add(new ToolStripSeparator());

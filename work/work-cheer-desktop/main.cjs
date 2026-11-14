@@ -1,7 +1,7 @@
 const {app, BrowserWindow, Menu, session, dialog, screen, Tray, nativeImage, ipcMain} = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
-const VERSION = '1.10.0';
+const VERSION = '1.12.0';
 const mountFloating = require('./floating-renderer.cjs');
 const floatingStyles = {
   capsule:{label:'极简胶囊',width:360,height:64},
@@ -9,6 +9,9 @@ const floatingStyles = {
   ring:{label:'倒计时圆环',width:200,height:200}
 };
 const validStyle = value => Object.hasOwn(floatingStyles,value) ? value : 'capsule';
+// 1.12: the floating widget may wear its own 主题 ('' follows the main window); colour and appearance always follow.
+const floatingThemes = [['glass','玻璃'],['widgets','小组件'],['zhimo','纸墨'],['pixel','像素'],['cyber','赛博朋克'],['y2k','千禧'],['clay','黏土'],['lcd','液晶']];
+const validTheme = value => floatingThemes.some(([id]) => id === value) ? value : '';
 const smoke = process.argv.includes('--smoke-test');
 const argument = (name, fallback) => process.argv.find(v => v.startsWith(name + '='))?.slice(name.length + 1) || fallback;
 const reportPath = path.resolve(argument('--smoke-output', path.join(__dirname, 'smoke-report.json')));
@@ -32,14 +35,14 @@ function loadPreferences() {
   let value = {};
   try {value = JSON.parse(fs.readFileSync(preferencePath,'utf8')) || {};} catch {}
   return {opacity:opacityChoices.includes(value.opacity)?value.opacity:100, alwaysOnTop:value.alwaysOnTop===true, closeToTray:value.closeToTray===true,
-    floating:value.floating===true, floatingStyle:validStyle(value.floatingStyle),
+    floating:value.floating===true, floatingStyle:validStyle(value.floatingStyle), floatingTheme:validTheme(value.floatingTheme),
     fullBounds:validBounds(value.fullBounds), floatingBounds:validBounds(value.floatingBounds),
     floatingBoundsByStyle:Object.fromEntries(Object.keys(floatingStyles).map(id=>[id,validBounds(value.floatingBoundsByStyle?.[id])])),
     fullMaximized:value.fullMaximized===true};
 }
 let preferences = loadPreferences();
 let mainWindow, tray, trayMenu, floatingMenu, windowMenu;
-let isQuitting = false, switchingWindow = false, currentFloating = false, currentStyle = preferences.floatingStyle, switchQueue = Promise.resolve();
+let isQuitting = false, switchingWindow = false, currentFloating = false, currentStyle = preferences.floatingStyle, currentTheme = preferences.floatingTheme, switchQueue = Promise.resolve();
 let floatingDrag=null;
 function logError(error) {
   try {fs.mkdirSync(app.getPath('userData'),{recursive:true});fs.appendFileSync(path.join(app.getPath('userData'),'startup-error.log'),new Date().toISOString()+' '+(error.stack||error)+'\n');} catch {}
@@ -123,6 +126,8 @@ async function openSettings() {
   await switchMode(false,!smoke);
   await mainWindow.webContents.executeJavaScript(`document.querySelector('.settings-button')?.click()`);
 }
+// Like picking a style: saved, then the widget is shown (rebuilt when it was already showing another theme).
+function pickTheme(id){savePreferences({floatingTheme:validTheme(id)});return switchMode(true,!smoke);}
 function quitApp(){isQuitting=true;app.quit();}
 function destroyTray(){if(tray&&!tray.isDestroyed())tray.destroy();}
 function refreshMenus() {
@@ -131,9 +136,12 @@ function refreshMenus() {
   const topItem=()=>({id:'always-top',label:currentFloating?'悬浮窗始终置顶':'始终置顶',type:'checkbox',checked:currentFloating||preferences.alwaysOnTop,enabled:!currentFloating,click:item=>updatePreference({alwaysOnTop:item.checked})});
   const modeItem=()=>({id:'floating-mode',label:currentFloating?'返回完整窗口':'进入悬浮窗',click:()=>switchMode(!currentFloating,!smoke)});
   const styleItem=()=>({id:'floating-styles',label:'悬浮窗样式',submenu:Object.entries(floatingStyles).map(([id,design])=>({id:'style-'+id,label:design.label,type:'radio',checked:preferences.floatingStyle===id,click:()=>switchMode(true,!smoke,id)}))});
+  // The separator splits Electron's radio groups; every pick rebuilds the menus (pickTheme → createWindow), so one tick stays.
+  const themeRadio=([id,label])=>({id:'theme-'+(id||'follow'),label,type:'radio',checked:preferences.floatingTheme===id,click:()=>pickTheme(id)});
+  const themeItem=()=>({id:'floating-themes',label:'悬浮窗主题',submenu:[themeRadio(['','跟随主窗口']),{type:'separator'},...floatingThemes.map(themeRadio)]});
   const aboutItem={label:'关于上班鼓励器',click:()=>dialog.showMessageBox(mainWindow,{type:'info',title:'关于上班鼓励器',message:'上班鼓励器 '+VERSION,
     detail:'实时收入估算 · 下班倒计时 · 悬浮窗 · 托盘与透明度\n\n按住窗口顶部或卡片外的空白处可移动窗口；悬浮窗按住即可拖动，右键或按 Esc 返回完整窗口。\n工资与作息数据仅保存在本机当前 Windows 账户，收入仅为估算。\n\n桌面交互参考 WizzenH/xindong（MIT）。\n保存位置：'+app.getPath('userData'),buttons:['知道了']})};
-  const windowItems=()=>[modeItem(),styleItem(),{id:'settings',label:'设置',click:openSettings},topItem(),
+  const windowItems=()=>[modeItem(),styleItem(),themeItem(),{id:'settings',label:'设置',click:openSettings},topItem(),
     {label:'窗口透明度',submenu:opacityChoices.map(value=>({id:'opacity-'+value,label:value+'%',type:'radio',checked:preferences.opacity===value,click:()=>updatePreference({opacity:value})}))},
     {type:'separator'},{id:'hide-to-tray',label:'收起到托盘',enabled:hasTray,click:hideToTray},
     {id:'close-to-tray',label:'关闭窗口时收起到托盘',type:'checkbox',checked:preferences.closeToTray,enabled:hasTray,click:item=>updatePreference({closeToTray:item.checked})},
@@ -144,19 +152,19 @@ function refreshMenus() {
   const items=windowItems();
   windowMenu=Menu.buildFromTemplate([...items.slice(0,-1),aboutItem,items.at(-1)]);
   mainWindow.setMenu(currentFloating?null:Menu.getApplicationMenu());
-  floatingMenu=Menu.buildFromTemplate([styleItem(),{type:'separator'},{id:'float-full',label:'返回完整窗口',accelerator:'Esc',click:()=>switchMode(false,!smoke)},
+  floatingMenu=Menu.buildFromTemplate([styleItem(),themeItem(),{type:'separator'},{id:'float-full',label:'返回完整窗口',accelerator:'Esc',click:()=>switchMode(false,!smoke)},
     {id:'float-settings',label:'设置',click:openSettings},{id:'float-hide',label:'收起到托盘',enabled:hasTray,click:hideToTray},{type:'separator'},{id:'float-quit',label:'退出',click:quitApp}]);
-  if(hasTray){trayMenu=Menu.buildFromTemplate([{id:'tray-show',label:'显示窗口',click:showWindow},modeItem(),styleItem(),{id:'tray-hide',label:'收起到托盘',enabled:mainWindow.isVisible(),click:hideToTray},
+  if(hasTray){trayMenu=Menu.buildFromTemplate([{id:'tray-show',label:'显示窗口',click:showWindow},modeItem(),styleItem(),themeItem(),{id:'tray-hide',label:'收起到托盘',enabled:mainWindow.isVisible(),click:hideToTray},
     {id:'tray-settings',label:'设置',click:openSettings},topItem(),{type:'separator'},{id:'tray-quit',label:'退出',click:quitApp}]);tray.setContextMenu(trayMenu);}
 }
-async function createWindow(floating, shouldShow, style) {
+async function createWindow(floating, shouldShow, style, theme='') {
   const savedFloating=preferences.floatingBoundsByStyle[style]||preferences.floatingBounds;
   const bounds=fitBounds(floating,floating?savedFloating:preferences.fullBounds,style);
   const win=new BrowserWindow({...bounds,title:'上班鼓励器',show:false,frame:false,useContentSize:!floating,transparent:floating,resizable:!floating,maximizable:!floating,
     minWidth:floating?bounds.width:Math.min(380,bounds.width),minHeight:floating?bounds.height:Math.min(640,bounds.height),
     backgroundColor:floating?'#00000000':'#EEF0F6',icon:path.join(__dirname,'assets','icon.png'),opacity:preferences.opacity/100,alwaysOnTop:floating||preferences.alwaysOnTop,
     webPreferences:{contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true,backgroundThrottling:false,preload:path.join(__dirname,floating?'floating-preload.cjs':'window-preload.cjs')}});
-  mainWindow=win;currentFloating=floating;currentStyle=style;
+  mainWindow=win;currentFloating=floating;currentStyle=style;currentTheme=theme;
   const wc=win.webContents;
   wc.setWindowOpenHandler(()=>({action:'deny'}));
   wc.on('will-navigate',event=>event.preventDefault());
@@ -180,25 +188,25 @@ async function createWindow(floating, shouldShow, style) {
   for(let attempt=0;attempt<100;attempt++){if(await wc.executeJavaScript(`Boolean(document.querySelector('.income-value'))`))break;await delay(25);}
   if(floating){
     await wc.insertCSS(fs.readFileSync(path.join(__dirname,'floating.css'),'utf8'));
-    await wc.executeJavaScript('('+mountFloating.toString()+')('+JSON.stringify(style)+')');
+    await wc.executeJavaScript('('+mountFloating.toString()+')('+JSON.stringify(style)+','+JSON.stringify(theme)+')');
   }
   await wc.executeJavaScript(`document.fonts.ready.then(()=>true)`);
   if(floating)wc.setZoomFactor(1);
   if(!floating&&preferences.fullMaximized)win.maximize();
-  report.lastWindowReady={floating,style,loadedBeforeShow:!win.isVisible(),bounds:win.getBounds()};
+  report.lastWindowReady={floating,style,theme,loadedBeforeShow:!win.isVisible(),bounds:win.getBounds()};
   if(shouldShow){win.show();win.focus();}
   return win;
 }
 function switchMode(floating,shouldShow=true,style) {
   switchQueue=switchQueue.then(async()=>{
-    const selected=validStyle(style||preferences.floatingStyle);
-    if(mainWindow&&!mainWindow.isDestroyed()&&currentFloating===floating&&(!floating||currentStyle===selected)){if(shouldShow)showWindow();return mainWindow;}
+    const selected=validStyle(style||preferences.floatingStyle),theme=preferences.floatingTheme;
+    if(mainWindow&&!mainWindow.isDestroyed()&&currentFloating===floating&&(!floating||currentStyle===selected&&currentTheme===theme)){if(shouldShow)showWindow();return mainWindow;}
     switchingWindow=true;
     try {
       if(mainWindow&&!mainWindow.isDestroyed()){
         const previous=mainWindow;persistPlacement(previous,currentFloating);previous.hide();session.defaultSession.flushStorageData();mainWindow=null;previous.destroy();
       }
-      savePreferences({floating,floatingStyle:selected});return await createWindow(floating,shouldShow,selected);
+      savePreferences({floating,floatingStyle:selected});return await createWindow(floating,shouldShow,selected,theme);
     } finally {switchingWindow=false;}
   });
   return switchQueue;
@@ -223,5 +231,5 @@ app.whenReady().then(async()=>{
   const initial=requestedStyle||process.argv.includes('--floating')?true:process.argv.includes('--full')?false:preferences.floating;
   await switchMode(initial,!smoke,requestedStyle||preferences.floatingStyle);
   if(smoke)await require('./smoke-floating.cjs')({app,session,Menu,screen,report,reportPath,phase,delay,getWindow:()=>mainWindow,getPreferences:()=>({...preferences}),getFloating:()=>currentFloating,
-    getTrayMenu:()=>trayMenu,getFloatingMenu:()=>floatingMenu,switchMode,secondInstance,openSettings,savePreferences,persistPlacement,fitBounds,validBounds,destroyTray,quitApp,floatingStyles});
+    getTrayMenu:()=>trayMenu,getFloatingMenu:()=>floatingMenu,switchMode,secondInstance,openSettings,savePreferences,persistPlacement,fitBounds,validBounds,destroyTray,quitApp,floatingStyles,floatingThemes});
 }).catch(fail);

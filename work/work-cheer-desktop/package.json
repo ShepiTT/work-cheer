@@ -1,6 +1,6 @@
 {
   "name": "work-cheer-desktop",
-  "version": "1.10.0",
+  "version": "1.12.0",
   "description": "上班鼓励器 Windows 桌面版：离线收入估算和下班倒计时",
   "main": "main.cjs",
   "author": "Work Cheer",

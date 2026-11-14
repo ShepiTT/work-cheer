@@ -17,18 +17,18 @@
 
 ## 下载与使用
 
-当前版本：**1.10.0**。
+当前版本：**1.12.0**。
 
 | 版本 | 下载 | 使用方式 |
 | --- | --- | --- |
-| Windows 完整版 | [完整版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.10.0/work-cheer-1.10.0-windows-full-x64.zip) | EXE 102.8 MB，自带 Electron 内核，解压运行 |
-| Windows 轻量版 | [轻量版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.10.0/work-cheer-1.10.0-windows-lite-x64.zip) | EXE 1.8 MB，依赖系统 Edge WebView2 和 .NET Framework 4.8，解压运行 |
-| 单文件离线网页 | [离线网页版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.10.0/work-cheer-1.10.0-offline-web.zip) | 解压后用浏览器打开 `上班鼓励器.html` |
+| Windows 完整版 | [完整版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.12.0/work-cheer-1.12.0-windows-full-x64.zip) | EXE 102.7 MB，自带 Electron 内核，解压运行 |
+| Windows 轻量版 | [轻量版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.12.0/work-cheer-1.12.0-windows-lite-x64.zip) | EXE 1.8 MB，依赖系统 Edge WebView2 和 .NET Framework 4.8，解压运行 |
+| 单文件离线网页 | [离线网页版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.12.0/work-cheer-1.12.0-offline-web.zip) | 解压后用浏览器打开 `上班鼓励器.html` |
 | 源码 | [下载源码](https://github.com/ShepiTT/work-cheer/archive/refs/heads/main.zip) | 参考下方本地开发步骤 |
 
 两个 Windows 版本均为 x64。轻量版复用主界面，悬浮窗采用原生绘制；自动检查已通过，真实鼠标拖动、缩放、菜单与托盘仍待用户试用。轻量版首次启动尝试复制完整版数据，之后各自保存、不自动同步。
 
-下载文件的 SHA-256 校验值见 [Release 附件](https://github.com/ShepiTT/work-cheer/releases/tag/v1.10.0)。Windows 版为未签名便携软件；软件运行无需联网，也不需要注册账户。
+下载文件的 SHA-256 校验值见 [Release 附件](https://github.com/ShepiTT/work-cheer/releases/tag/v1.12.0)。Windows 版为未签名便携软件；软件运行无需联网，也不需要注册账户。
 
 1. 打开设置，填写日薪或月薪、上下班时间和午休安排。
 2. 按公司实际情况检查工作日历；国家放假和调休补班可自动纳入，也可以手动改单个日期。
@@ -46,12 +46,15 @@
 
 ### 桌面悬浮窗，只留下两件事
 
-三款样式：**极简胶囊、透明悬字、倒计时圆环**。只显示今日收入和下班倒计时；颜色与浅深外观跟随主题，进度条或圆环随今日工时更新。
+三种形状：**极简胶囊、透明悬字、倒计时圆环**。1.12.0 起可单独选 **悬浮窗主题**：跟随主窗口（默认），或从玻璃、小组件、纸墨、像素、赛博朋克、千禧、黏土、液晶中任意选一套，形成 **3 种样式 × 8 套主题 = 24 种搭配**。例如主窗口用玻璃、悬浮窗用像素；颜色与浅深外观仍跟随主窗口。
 
-![三款悬浮窗在玻璃浅色、玻璃深色和纸墨主题下的效果](docs/images/floating-widgets.png)
+像素有缺角边框与方块进度，赛博朋克有霓虹切角与分段圆环，千禧用复古窗口与立体饼图，黏土用柔软立体面板，液晶用数码管和刻度屏。只显示今日收入、下班倒计时及工时进度。
+
+![八套悬浮窗主题与三种样式的 24 种搭配](docs/images/floating-widgets.png)
 
 - 按住金额、倒计时或可见背景拖动；三款分别记住位置。
-- 右键切换样式、进入设置或退出；按 `Esc` 回到完整窗口。
+- 右键 → **悬浮窗样式** 选形状，右键 → **悬浮窗主题** 选外观；托盘和右上角 ⋯ 菜单也有同样入口。
+- 进入设置或按 `Esc` 回到完整窗口；所选悬浮窗主题重启后保留。
 - 悬浮窗保持置顶，完整窗口的大小、最大化和置顶偏好独立保存。
 
 ### 无系统标题栏的 Windows 窗口
@@ -73,7 +76,7 @@
 | 暂停和重置 | 暂停期间不累计收入，倒计时继续；重置只影响当天 |
 | 放假与调休 | 内置 2026 年中国大陆官方安排，支持单日手动覆盖 |
 | 外观 | 八种主题 × 八种颜色，支持浅色、深色和自动 |
-| Windows 交互 | 三款悬浮窗、自绘标题栏、托盘、置顶、透明度、位置记忆 |
+| Windows 交互 | 3 种悬浮窗样式 × 8 套独立主题、自绘标题栏、托盘、置顶、透明度、位置记忆 |
 | 本地保存 | 工资、作息和记录保存在当前浏览器或本机账户，无云端同步 |
 
 ## 日历与计算口径

@@ -2,10 +2,10 @@ const fs=require('node:fs');
 const path=require('node:path');
 const assert=(value,message)=>{if(!value)throw new Error(message)};
 module.exports=async function smokeFloating(api){
-  const {app,session,Menu,screen,report,reportPath,phase,delay,getWindow,getPreferences,getFloating,getTrayMenu,getFloatingMenu,switchMode,secondInstance,savePreferences,persistPlacement,fitBounds,validBounds,destroyTray,floatingStyles}=api;
+  const {app,session,Menu,screen,report,reportPath,phase,delay,getWindow,getPreferences,getFloating,getTrayMenu,getFloatingMenu,switchMode,secondInstance,savePreferences,persistPlacement,fitBounds,validBounds,destroyTray,floatingStyles,floatingThemes}=api;
   const js=source=>getWindow().webContents.executeJavaScript(source);
   const settle=()=>delay(350);
-  const snapshot=()=>js(`(() => {const w=document.querySelector('.floating-widget');const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};return {style:document.body.dataset.floatingStyle,width:innerWidth,height:innerHeight,sourceAmount:document.querySelector('.income-value').textContent,amount:w?.querySelector('.float-money').textContent,time:w?.querySelector('.float-time').textContent,rects:w?[...w.querySelectorAll('.float-label,.float-money,.float-time')].map(rect):[],metricCount:w?.querySelectorAll('.float-metric').length,drag:w?getComputedStyle(w).webkitAppRegion:null,bodyBackground:getComputedStyle(document.body).backgroundColor,faceBackground:w?getComputedStyle(w.querySelector('.float-face')).backgroundColor:null,rootHidden:getComputedStyle(document.getElementById('root')).display==='none',ringProgress:w?.querySelector('canvas').dataset.progress,nodeExposed:typeof require!=='undefined',state:JSON.parse(localStorage.getItem('work-cheer-v1'))}})()`);
+  const snapshot=()=>js(`(() => {const w=document.querySelector('.floating-widget');const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};return {style:document.body.dataset.floatingStyle,htmlStyle:document.documentElement.dataset.style,width:innerWidth,height:innerHeight,sourceAmount:document.querySelector('.income-value').textContent,amount:w?.querySelector('.float-money').textContent,time:w?.querySelector('.float-time').textContent,rects:w?[...w.querySelectorAll('.float-label,.float-money,.float-time')].map(rect):[],metricCount:w?.querySelectorAll('.float-metric').length,drag:w?getComputedStyle(w).webkitAppRegion:null,bodyBackground:getComputedStyle(document.body).backgroundColor,faceBackground:w?getComputedStyle(w.querySelector('.float-face')).backgroundColor:null,rootHidden:getComputedStyle(document.getElementById('root')).display==='none',ringProgress:w?.querySelector('canvas').dataset.progress,nodeExposed:typeof require!=='undefined',state:JSON.parse(localStorage.getItem('work-cheer-v1'))}})()`);
   function check(data,id){
     const design=floatingStyles[id];
     assert(data.style===id&&data.width===design.width&&data.height===design.height,'Incorrect style/viewport '+id+' '+JSON.stringify(data));
@@ -51,6 +51,23 @@ module.exports=async function smokeFloating(api){
       report.styles[id]={viewport:{width:data.width,height:data.height},amount:data.amount,time:data.time,rightClick:true,transparent:data.faceBackground==='rgba(0, 0, 0, 0)',programmaticDrag:{start,moved,saved}};
     }
     report.checks.allThreeStylesAndRealContextInput=true;report.checks.sameSalaryAndRecords=true;report.checks.preloadPointerDragMovesAndSavesAllStyles=true;
+    // 1.12: every widget theme from the menu, in every style; the main window's look and the salary data stay as they were.
+    const mainLook=report.initial.htmlStyle;report.widgetThemes={};
+    for(const [theme] of floatingThemes){
+      getFloatingMenu().getMenuItemById('theme-'+theme).click();await switchMode(true,false);
+      for(const id of Object.keys(floatingStyles)){
+        await select(id);const data=await snapshot();check(data,id);
+        assert(data.htmlStyle===theme&&getPreferences().floatingTheme===theme,'Widget theme '+theme+' not applied in '+id+': '+data.htmlStyle);
+        assert(JSON.stringify(data.state)===JSON.stringify(paused),'Widget theme changed salary/records/main look');
+      }
+      report.widgetThemes[theme]=Object.keys(floatingStyles);
+    }
+    await js(`document.documentElement.dataset.style=${JSON.stringify(mainLook==='lcd'?'glass':mainLook)}`);await delay(60);
+    assert((await snapshot()).htmlStyle==='lcd','Widget theme not held when the page re-applies its look');
+    getTrayMenu().getMenuItemById('theme-follow').click();await switchMode(true,false);await settle();
+    const followed=await snapshot();check(followed,getPreferences().floatingStyle);
+    assert(followed.htmlStyle===mainLook&&getPreferences().floatingTheme==='','Follow-main-window theme not restored: '+followed.htmlStyle);
+    report.checks.widgetThemeIndependentOfMainWindow=true;
     const before=await snapshot();await delay(1250);const after=await snapshot();
     assert(before.amount===after.amount&&before.time!==after.time,'Pause must freeze money while countdown continues');report.checks.pauseAndLiveCountdown=true;
     // These isolated captures use the same illustrative values as the selected design images.
@@ -86,12 +103,13 @@ module.exports=async function smokeFloating(api){
     await select('ring',Menu.getApplicationMenu());getFloatingMenu().getMenuItemById('float-settings').click();await delay(100);await switchMode(false,false);await delay(150);
     assert(await js(`Boolean(document.querySelector('dialog')?.open)`),'Settings not opened in full window');assert(!getWindow().isAlwaysOnTop(),'Normal top flag polluted');
     assert(getWindow().getContentBounds().height===700,'Full size not restored');report.checks.escapeSettingsAndFullWindowRestore=true;
-    await switchMode(true,false,'ring');persistPlacement();
+    getFloatingMenu().getMenuItemById('theme-lcd').click();await switchMode(true,false,'ring');persistPlacement();
     const fitted=fitBounds(true,{x:90000,y:90000,width:200,height:200},'ring');assert(screen.getAllDisplays().some(({workArea:a})=>fitted.x>=a.x&&fitted.y>=a.y&&fitted.x+fitted.width<=a.x+a.width&&fitted.y+fitted.height<=a.y+a.height),'Offscreen window not recoverable');
     assert(validBounds({x:NaN,y:0,width:10,height:10})===null,'Invalid placement accepted');report.checks.offscreenRecovery=true;
     report.savedPreferences=getPreferences();
   }else{
     assert(report.initial.style==='ring','Selected ring style did not survive restart');
+    assert(report.initial.htmlStyle==='lcd'&&getPreferences().floatingTheme==='lcd','Widget theme did not survive restart: '+report.initial.htmlStyle);report.checks.widgetThemePersistsAcrossRestart=true;
     assert(report.initial.state.version===1&&report.initial.state.settings.goalName==='一场电影','Existing data not preserved');
     for(const id of Object.keys(floatingStyles)){await select(id);check(await snapshot(),id);const saved=getPreferences().floatingBoundsByStyle[id],actual=getWindow().getBounds();assert(saved.x===actual.x&&saved.y===actual.y,'Per-style placement lost '+id);}
     await switchMode(false,false);assert(getWindow().getContentBounds().height===700,'Full window size lost on restart');

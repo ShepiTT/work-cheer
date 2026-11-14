@@ -114,7 +114,23 @@ namespace WorkCheerLite
             else if (type == "resize") BeginResize(Field(message, "edge", ""));
             else if (type == "float") app.OnFloatData(ParseFloat(message));
             else if (type == "error") app.PageError(Field(message, "message", "script error"));
-            else if (type == "ready") { PageReady = true; PushMaximized(); }
+            else if (type == "ready") { PageReady = true; PushMaximized(); PushFloatTheme(); }
+        }
+
+        /// Answers the bridge's "ready": it starts reporting the widget's data once it knows the widget theme.
+        void PushFloatTheme()
+        {
+            if (web.CoreWebView2 == null) return;
+            web.CoreWebView2.PostWebMessageAsJson("{\"type\":\"floatTheme\",\"value\":" + json.Serialize(app.Prefs.FloatingTheme) + "}");
+        }
+
+        /// Switches the widget theme in the page and returns the widget's data measured in it (null if the page is not ready).
+        public async Task<FloatData> ApplyFloatTheme(string theme)
+        {
+            var result = await Eval("window.__workCheerFloatTheme ? window.__workCheerFloatTheme(" + json.Serialize(theme) + ") : null");
+            Dictionary<string, object> message = null;
+            try { message = json.Deserialize<Dictionary<string, object>>(result); } catch (Exception) { }
+            return message == null ? null : ParseFloat(message);
         }
 
         static FloatData ParseFloat(Dictionary<string, object> m)
@@ -136,6 +152,10 @@ namespace WorkCheerLite
             d.AccentText = FloatData.ParseColor(Field(m, "accentText", null), d.AccentText);
             d.Line = FloatData.ParseColor(Field(m, "line", null), d.Line);
             d.Edge = FloatData.ParseColor(Field(m, "edge", null), d.Edge);
+            var tokens = m.TryGetValue("tokens", out value) ? value as Dictionary<string, object> : null;
+            if (tokens != null)
+                foreach (var pair in tokens)
+                    if (pair.Value is string) d.Tokens[pair.Key] = FloatData.ParseColor((string)pair.Value, Color.Transparent);
             return d;
         }
 

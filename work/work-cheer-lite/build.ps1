@@ -2,7 +2,7 @@
 # Needs only what Windows ships (the .NET Framework 4.8 C# compiler) plus Node for tools\prepare.cjs.
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
-$version = '1.10.0'
+$version = '1.12.0'
 $sdk = (Resolve-Path (Join-Path $root '..\third_party\microsoft.web.webview2.1.0.4314.35\extracted')).Path
 $obj = Join-Path $root 'obj'
 $dist = Join-Path $root 'dist'
@@ -21,7 +21,9 @@ $arguments = @(
   "/resource:$sdk\Microsoft.Web.WebView2.Core.dll,Microsoft.Web.WebView2.Core.dll",
   "/resource:$sdk\Microsoft.Web.WebView2.WinForms.dll,Microsoft.Web.WebView2.WinForms.dll",
   "/resource:$sdk\WebView2Loader.dll,WebView2Loader.dll",
-  "/resource:$obj\index.html,index.html", "/resource:$root\src\bridge.js,bridge.js", "/resource:$obj\icon.ico,icon.ico"
+  "/resource:$obj\index.html,index.html", "/resource:$root\src\bridge.js,bridge.js", "/resource:$obj\icon.ico,icon.ico",
+  # Numeral fonts for the 像素 / 液晶 floating widgets (made by ../work-cheer/scripts/make-display-fonts.py).
+  "/resource:$root\fonts\wc-pixel.ttf,wc-pixel.ttf", "/resource:$root\fonts\wc-lcd.ttf,wc-lcd.ttf"
 ) + $sources
 & $csc @arguments
 if ($LASTEXITCODE) { throw 'csc failed' }

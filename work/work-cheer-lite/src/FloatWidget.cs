@@ -18,14 +18,26 @@ namespace WorkCheerLite
         public Color Card = Color.White, Text = Color.FromArgb(0x1D, 0x1D, 0x1F), Muted = Color.FromArgb(0x6E, 0x6E, 0x73);
         public Color Accent = Color.FromArgb(0x00, 0x7A, 0xFF), Accent2 = Color.FromArgb(0x32, 0xAD, 0xE6), AccentText = Color.FromArgb(0x00, 0x62, 0xCC);
         public Color Line = Color.FromArgb(31, 60, 60, 67), Edge = Color.FromArgb(184, 255, 255, 255);
+        /// Extra look tokens (ink, bevels, LCD…) the 1.10 themes' widgets are drawn with; see FloatThemes.cs.
+        public readonly Dictionary<string, Color> Tokens = new Dictionary<string, Color>();
 
         public bool Dark { get { return Scheme == "dark"; } }
+        public Color Token(string name, Color fallback) { Color value; return Tokens.TryGetValue(name, out value) ? value : fallback; }
         // Glass cannot blur the desktop behind a window, so it becomes a nearly opaque sheet (same rule as floating.css).
         public Color Surface { get { return Style == "glass" ? (Dark ? Color.FromArgb(230, 30, 30, 36) : Color.FromArgb(230, 255, 255, 255)) : Card; } }
         public Color Border { get { return Style == "glass" ? Edge : Line; } }
         public double Amount { get { double value; return double.TryParse(Earned, NumberStyles.Float, CultureInfo.InvariantCulture, out value) ? value : 0; } }
 
-        public string Key { get { return string.Join("|", Earned, Time, Label, Style, Scheme, Live, Progress.ToString("0.000", CultureInfo.InvariantCulture), Card.ToArgb(), Text.ToArgb(), Muted.ToArgb(), Accent.ToArgb(), Accent2.ToArgb(), AccentText.ToArgb(), Border.ToArgb()); } }
+        public string Key
+        {
+            get
+            {
+                var tokens = new List<string>();
+                foreach (var pair in Tokens) tokens.Add(pair.Key + "=" + pair.Value.ToArgb());
+                tokens.Sort(StringComparer.Ordinal);
+                return string.Join("|", Earned, Time, Label, Style, Scheme, Live, Progress.ToString("0.000", CultureInfo.InvariantCulture), Card.ToArgb(), Text.ToArgb(), Muted.ToArgb(), Accent.ToArgb(), Accent2.ToArgb(), AccentText.ToArgb(), Border.ToArgb(), string.Join(",", tokens));
+            }
+        }
 
         /// Accepts the forms getComputedStyle produces: rgb(), rgba(), color(srgb …) and #hex.
         public static Color ParseColor(string value, Color fallback)
@@ -62,7 +74,7 @@ namespace WorkCheerLite
 
     /// The floating widget: a per-pixel-alpha layered window painted with GDI+, so its rounded,
     /// see-through shapes need no browser. Drag is the system move loop (whole window is caption).
-    class FloatWidget : Form
+    partial class FloatWidget : Form
     {
         public static readonly Dictionary<string, Size> Designs = new Dictionary<string, Size>
         {
@@ -141,7 +153,8 @@ namespace WorkCheerLite
                 g.PixelOffsetMode = PixelOffsetMode.HighQuality;
                 g.TextRenderingHint = TextRenderingHint.AntiAlias;
                 g.ScaleTransform(zoom, zoom);
-                if (style == "capsule") PaintCapsule(g);
+                if (Themed(data.Style)) PaintThemed(g);
+                else if (style == "capsule") PaintCapsule(g);
                 else if (style == "transparent") PaintTransparent(g);
                 else PaintRing(g);
             }

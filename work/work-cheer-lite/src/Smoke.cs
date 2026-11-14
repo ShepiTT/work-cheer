@@ -79,10 +79,36 @@ namespace WorkCheerLite
                 index++;
             }
             checks["threeNativeStylesRenderAndRememberPositions"] = true;
+            Assert(FloatWidget.DisplayFontsLoaded, "pixel/LCD numeral fonts not embedded");
+            checks["displayFontsEmbedded"] = true;
+            // 1.12: every widget theme in every style; the page keeps its own look.
+            var pageLook = await app.Main.Eval("document.documentElement.dataset.style");
+            var followed = app.LastFloat.Style;
+            foreach (var theme in Prefs.Themes)
+            {
+                await app.PickTheme(theme);
+                foreach (var style in Prefs.Styles)
+                {
+                    app.SwitchMode(true, style);
+                    await Task.Delay(300);
+                    Assert(app.LastFloat.Style == theme && app.Prefs.FloatingTheme == theme && app.Float.Visible && app.Float.CurrentStyle == style, "widget theme " + theme + " " + style + ": " + app.LastFloat.Style);
+                    using (var shot = app.Float.Snapshot())
+                    {
+                        Assert(Coverage(shot) > .04, "widget looks empty: " + theme + " " + style);
+                        if (shots != null) shot.Save(Path.Combine(shots, "theme-" + theme + "-" + style + ".png"), ImageFormat.Png);
+                    }
+                }
+            }
+            Assert(await app.Main.Eval("document.documentElement.dataset.style") == pageLook, "the widget theme changed the page's look");
+            await app.PickTheme("");
+            await Task.Delay(300);
+            Assert(app.LastFloat.Style == followed && app.Prefs.FloatingTheme == "", "follow main window: " + app.LastFloat.Style);
+            checks["widgetThemeIndependentOfMainWindow"] = true;
             app.SwitchMode(false, null);
             await Task.Delay(300);
             Assert(app.Main.Visible && !app.Float.Visible, "did not return to the full window");
             checks["returnToFullWindow"] = true;
+            await app.PickTheme("lcd");
             app.SwitchMode(true, "ring");
             await Task.Delay(300);
         }
@@ -93,6 +119,8 @@ namespace WorkCheerLite
             foreach (var style in Prefs.Styles) Assert(app.Prefs.FloatPositions.ContainsKey(style), "position lost for " + style);
             Assert(app.Float.Location == app.Prefs.FloatPositions["ring"], "ring position not restored");
             checks["styleAndPositionsPersistAcrossRestart"] = true;
+            Assert(app.Prefs.FloatingTheme == "lcd" && app.LastFloat.Style == "lcd", "widget theme not restored: " + app.LastFloat.Style);
+            checks["widgetThemePersistsAcrossRestart"] = true;
         }
 
         public void Finish()

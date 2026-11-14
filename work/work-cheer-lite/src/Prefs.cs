@@ -11,10 +11,13 @@ namespace WorkCheerLite
     {
         public static readonly int[] OpacityChoices = { 100, 90, 80, 65 };
         public static readonly string[] Styles = { "capsule", "transparent", "ring" };
+        /// 1.12: the floating widget's own 主题; "" follows the main window. Same ids as the page's STYLES.
+        public static readonly string[] Themes = { "glass", "widgets", "zhimo", "pixel", "cyber", "y2k", "clay", "lcd" };
+        public static readonly string[] ThemeNames = { "玻璃", "小组件", "纸墨", "像素", "赛博朋克", "千禧", "黏土", "液晶" };
 
         public int Opacity = 100;
         public bool AlwaysOnTop, CloseToTray, Floating, FullMaximized;
-        public string FloatingStyle = "capsule";
+        public string FloatingStyle = "capsule", FloatingTheme = "";
         public Rectangle FullBounds = Rectangle.Empty;
         public readonly Dictionary<string, Point> FloatPositions = new Dictionary<string, Point>();
         readonly string path;
@@ -54,6 +57,7 @@ namespace WorkCheerLite
             AlwaysOnTop = Flag(saved, "alwaysOnTop");
             CloseToTray = Flag(saved, "closeToTray");
             if (saved.TryGetValue("floatingStyle", out value) && value is string && Array.IndexOf(Styles, (string)value) >= 0) FloatingStyle = (string)value;
+            if (saved.TryGetValue("floatingTheme", out value) && value is string && Array.IndexOf(Themes, (string)value) >= 0) FloatingTheme = (string)value;
         }
 
         public void Save()
@@ -63,7 +67,7 @@ namespace WorkCheerLite
             var data = new Dictionary<string, object>
             {
                 { "opacity", Opacity }, { "alwaysOnTop", AlwaysOnTop }, { "closeToTray", CloseToTray }, { "floating", Floating },
-                { "floatingStyle", FloatingStyle }, { "fullMaximized", FullMaximized }, { "floatPositions", positions },
+                { "floatingStyle", FloatingStyle }, { "floatingTheme", FloatingTheme }, { "fullMaximized", FullMaximized }, { "floatPositions", positions },
             };
             if (!FullBounds.IsEmpty) data["fullBounds"] = new Dictionary<string, object> { { "x", FullBounds.X }, { "y", FullBounds.Y }, { "width", FullBounds.Width }, { "height", FullBounds.Height } };
             var temp = path + ".tmp";
