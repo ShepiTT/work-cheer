@@ -232,7 +232,7 @@ module.exports = function mountFloating(style, theme) {
     const values = [...(source?.querySelectorAll(':scope > span') || [])].map(node => node.textContent.padStart(2, '0'));
     timer.textContent = off ? '休息日' : finished ? '已下班' : values.length === 3 ? values.join(':') : '00:00:00';
     timer.dataset.ghost = off || finished ? '' : '88:88:88';
-    timeLabel.textContent = off ? '今日安排' : finished ? '今日工作' : '距下班';
+    timeLabel.textContent = off ? '今日安排' : finished ? '今日工作' : source?.dataset.label || '距下班';
     widget.dataset.status = off ? 'off' : finished ? 'finished' : 'counting';
     widget.dataset.live = status?.classList.contains('working') ? 'on' : 'off';
     const reported = Number(document.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow'));
@@ -244,5 +244,5 @@ module.exports = function mountFloating(style, theme) {
   }
   sync();
   const observer = new MutationObserver(sync);
-  observer.observe(root, {subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['class', 'aria-valuenow']});
+  observer.observe(root, {subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['class', 'aria-valuenow', 'data-label', 'data-phase']});
 };

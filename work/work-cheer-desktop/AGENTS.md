@@ -16,3 +16,5 @@
 - 1.12（用户 2026-11-14 选“悬浮窗外观单独选”，而不是新增形状）：菜单“悬浮窗主题”（跟随主窗口 + 八套），偏好 `floatingTheme`（"" = 跟随）。`mountFloating(style, theme)` 把主题写到悬浮窗页面的 `<html data-style>` 并用 MutationObserver 守住（页面在系统深浅色变化时会重设主窗口外观）；颜色与浅/深色仍跟随主窗口。切换主题像切样式一样重建窗口。冒烟检查覆盖 8 主题 × 3 样式、跟随主窗口、重启后保留。
 - 仅桌面工程有改动时，不发布网站或修改网页工程。
 - 用户要求交付目录只保留最新版本：发布新版后把旧版 EXE、旧说明和旧预览移到回收站（不永久删除），不再并排保留。
+
+- 1.13 (user confirmed 2026-11-14): optional splitCountdown uses breakStart (中午下班) and breakEnd (下午上班) to count to noon, afternoon start, then day end. Default false for old-settings compatibility; independent of breakEnabled (unpaid lunch). Existing remainingMs and salary calculations stay unchanged; new countdownMs/countdownPhase/countdownLabel drive the UI, and .countdown[data-label] is mirrored by both desktop widget feeds. Never duplicate phase arithmetic in the widgets.

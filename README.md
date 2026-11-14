@@ -2,7 +2,7 @@
   <img src="docs/images/app-icon.png" width="80" alt="上班鼓励器：励字印章图标">
   <h1>上班鼓励器 · Work Cheer</h1>
   <p>今天赚了多少钱，距离下班还有多久。</p>
-  <p>实时收入进度 · 下班倒计时 · 三款桌面悬浮窗 · 放假调休</p>
+  <p>实时收入进度 · 午间分段倒计时 · 三款桌面悬浮窗 · 放假调休</p>
   <p>
     <a href="https://github.com/ShepiTT/work-cheer/releases/latest">下载最新版</a> ·
     <a href="#界面预览">看界面</a> ·
@@ -17,26 +17,35 @@
 
 ## 下载与使用
 
-当前版本：**1.12.0**。
+当前版本：**1.13.0**。
 
 | 版本 | 下载 | 使用方式 |
 | --- | --- | --- |
-| Windows 完整版 | [完整版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.12.0/work-cheer-1.12.0-windows-full-x64.zip) | EXE 102.7 MB，自带 Electron 内核，解压运行 |
-| Windows 轻量版 | [轻量版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.12.0/work-cheer-1.12.0-windows-lite-x64.zip) | EXE 1.8 MB，依赖系统 Edge WebView2 和 .NET Framework 4.8，解压运行 |
-| 单文件离线网页 | [离线网页版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.12.0/work-cheer-1.12.0-offline-web.zip) | 解压后用浏览器打开 `上班鼓励器.html` |
+| Windows 完整版 | [完整版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.13.0/work-cheer-1.13.0-windows-full-x64.zip) | EXE 102.7 MB，自带 Electron 内核，解压运行 |
+| Windows 轻量版 | [轻量版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.13.0/work-cheer-1.13.0-windows-lite-x64.zip) | EXE 1.8 MB，依赖系统 Edge WebView2 和 .NET Framework 4.8，解压运行 |
+| 单文件离线网页 | [离线网页版 ZIP](https://github.com/ShepiTT/work-cheer/releases/download/v1.13.0/work-cheer-1.13.0-offline-web.zip) | 解压后用浏览器打开 `上班鼓励器.html` |
 | 源码 | [下载源码](https://github.com/ShepiTT/work-cheer/archive/refs/heads/main.zip) | 参考下方本地开发步骤 |
 
 两个 Windows 版本均为 x64。轻量版复用主界面，悬浮窗采用原生绘制；自动检查已通过，真实鼠标拖动、缩放、菜单与托盘仍待用户试用。轻量版首次启动尝试复制完整版数据，之后各自保存、不自动同步。
 
-下载文件的 SHA-256 校验值见 [Release 附件](https://github.com/ShepiTT/work-cheer/releases/tag/v1.12.0)。Windows 版为未签名便携软件；软件运行无需联网，也不需要注册账户。
+下载文件的 SHA-256 校验值见 [Release 附件](https://github.com/ShepiTT/work-cheer/releases/tag/v1.13.0)。Windows 版为未签名便携软件；软件运行无需联网，也不需要注册账户。
 
 1. 打开设置，填写日薪或月薪、上下班时间和午休安排。
-2. 按公司实际情况检查工作日历；国家放假和调休补班可自动纳入，也可以手动改单个日期。
-3. Windows 版点击右上角的悬浮窗按钮，让收入和倒计时留在桌面上。
+2. 如需分别等待中午和晚上下班，在设置 → 工资与作息中打开 **午间分段倒计时**，填写中午下班和下午上班时间。
+3. 按公司实际情况检查工作日历；国家放假和调休补班可自动纳入，也可以手动改单个日期。
+4. Windows 版点击右上角的悬浮窗按钮，让收入和倒计时留在桌面上。
 
 升级前先从托盘或右上角 ⋯ 菜单退出旧版，再打开新版；工资、记录和悬浮窗位置会沿用。旧版仍在运行时，双击新版会唤回旧窗口。
 
 ## 界面预览
+
+### 上午等中午下班，午休等下午上班
+
+1.13.0 新增可选的 **午间分段倒计时**：上午显示“距中午下班”，午休显示“距下午上班”，下午显示“距今日下班”；上班前显示“距上班”。主界面与两个 Windows 版的三款悬浮窗同步切换。
+
+在 **设置 → 工资与作息** 打开“午间分段倒计时”，填写“中午下班”和“下午上班”时间。旧设置默认关闭，启用后使用已有午休时间。**是否扣除午休收入仍由“扣除午休”单独控制**；暂停收入也不会暂停作息倒计时。
+
+![午间分段倒计时：上午、午休、下午三个阶段，演示数据与固定时间](docs/images/midday-countdown.png)
 
 ### 八种主题，每种都有自己的布局
 
@@ -70,7 +79,7 @@
 | 功能 | 说明 |
 | --- | --- |
 | 实时收入 | 日薪或月薪模式，按有效工作时长显示今日收入与每秒进度 |
-| 下班倒计时 | 以时、分、秒展示剩余时间，支持上班前、午休、休息日和已下班状态 |
+| 下班倒计时 | 可选上午到中午下班、午休到下午上班、下午到全天结束；支持上班前、休息日和已下班状态 |
 | 工作进度 | 当前已工作时长、当日进度、时薪和本月估算累计 |
 | 小目标 | 设置电影、咖啡等目标金额，查看今天的积累可以换来什么 |
 | 暂停和重置 | 暂停期间不累计收入，倒计时继续；重置只影响当天 |

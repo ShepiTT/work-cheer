@@ -89,12 +89,13 @@ export function App() {
   const stats = calculate(settings, now, record);
   const calendarDay = getCalendarDay(settings,now);
   const month = monthlyEarnings(settings, now, records);
-  const countdown = duration(stats.remainingMs);
+  const countdown = duration(stats.countdownMs);
+  const countdownHeading = { start: '距离上班还有', lunch: '距离中午下班还有', afternoon: '午休中 · 距下午上班', end: settings.splitCountdown ? '距离今日下班还有' : '距离下班还有' }[stats.countdownPhase];
   const progress = stats.progress * 100;
   const [whole, fraction] = stats.earned.toFixed(4).split('.');
   const goalReached = stats.earned >= settings.goalAmount;
   const goalPercent = Math.min(100, stats.earned / settings.goalAmount * 100);
-  const labels = { before: '待上班', working: calendarDay.label==='补班'?'调休补班':'上班中', break: '午休中', finished: '已下班', off: calendarDay.label==='放假'?'放假中':'休息日', paused: '已暂停' };
+  const labels = { before: '待上班', working: stats.countdownPhase==='afternoon'?'午休中':calendarDay.label==='补班'?'调休补班':'上班中', break: '午休中', finished: '已下班', off: calendarDay.label==='放假'?'放假中':'休息日', paused: '已暂停' };
   const rateNotes = { before: '到上班时间后自动开始累计', break: '午休中，收入暂停累计', paused: '已暂停，收入暂停累计', finished: '今天的工时已经走完', off: '今天是休息日' };
   const canPause = ['working', 'break', 'paused'].includes(stats.status);
   useEffect(() => { const timer = setInterval(() => setNow(new Date()), 250); return () => clearInterval(timer); }, []);
@@ -137,8 +138,8 @@ export function App() {
         {settings.salaryMode === 'monthly' && <p className="salary-basis">月薪 ¥{money(settings.monthlySalary)} · 本月 {stats.monthWorkdays} 个工作日</p>}
       </section>
       <section className="time-section" aria-label="下班倒计时">
-        <div className="time-head"><div className="time-main"><p className="eyebrow">{stats.status === 'off' ? '今天不用赶时间' : stats.status === 'finished' ? '今天的工作已结束' : '距离下班还有'}</p>
-          {stats.status === 'off' ? <div className="countdown rest">享受你的休息日<Coffee size={26}/></div> : stats.status === 'finished' ? <div className="countdown finished-text">下班啦，生活继续</div> : <div className="countdown"><span data-ghost={String(countdown.hours).replace(/\d/g, '8')}>{countdown.hours}</span><small>小时</small><span data-ghost="88">{countdown.minutes.toString().padStart(2, '0')}</span><small>分</small><span data-ghost="88">{countdown.seconds.toString().padStart(2, '0')}</span><small>秒</small></div>}
+        <div className="time-head"><div className="time-main"><p className="eyebrow">{stats.status === 'off' ? '今天不用赶时间' : stats.status === 'finished' ? '今天的工作已结束' : countdownHeading}</p>
+          {stats.status === 'off' ? <div className="countdown rest">享受你的休息日<Coffee size={26}/></div> : stats.status === 'finished' ? <div className="countdown finished-text">下班啦，生活继续</div> : <div className="countdown" data-label={stats.countdownLabel} data-phase={stats.countdownPhase}><span data-ghost={String(countdown.hours).replace(/\d/g, '8')}>{countdown.hours}</span><small>小时</small><span data-ghost="88">{countdown.minutes.toString().padStart(2, '0')}</span><small>分</small><span data-ghost="88">{countdown.seconds.toString().padStart(2, '0')}</span><small>秒</small></div>}
         </div>{stats.status !== 'off' && <p className="day-percent" data-ghost={progress.toFixed(1).replace(/\d/g, '8')} aria-hidden="true">{progress.toFixed(1)}<small>%</small></p>}</div>
         {stats.status !== 'off' && <><HourCells workedMs={stats.workedMs} totalMs={stats.totalMs} percent={progress}/>
         <div className="day-scale"><span>{settings.startTime}</span><span className="hours">已工作 <strong>{(stats.workedMs / HOUR).toFixed(2)}</strong> / {(stats.totalMs / HOUR).toFixed(2)} 小时</span><span>{settings.endTime}</span></div></>}

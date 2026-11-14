@@ -11,6 +11,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   startTime: '08:30',
   endTime: '17:00',
   breakEnabled: false,
+  splitCountdown: false,
   breakStart: '12:00',
   breakEnd: '13:00',
   workdays: Object.freeze([1, 2, 3, 4, 5]),
@@ -75,7 +76,8 @@ export function validateSettings(settings = {}) {
   if (start === null || end === null) errors.push('上下班时间需要使用有效的 HH:mm 格式');
   else if (end <= start) errors.push('下班时间需要晚于上班时间，暂不支持跨夜班次');
   if (typeof s.breakEnabled !== 'boolean') errors.push('休息时间开关无效');
-  if (s.breakEnabled) {
+  if (typeof s.splitCountdown !== 'boolean') errors.push('午间分段倒计时开关无效');
+  if (s.breakEnabled || s.splitCountdown) {
     const breakStart = timeMinutes(s.breakStart);
     const breakEnd = timeMinutes(s.breakEnd);
     if (breakStart === null || breakEnd === null) errors.push('休息时间需要使用有效的 HH:mm 格式');
@@ -175,8 +177,9 @@ function atMinutes(date, minutes) {
 function schedule(s, date) {
   const start = atMinutes(date, timeMinutes(s.startTime));
   const end = atMinutes(date, timeMinutes(s.endTime));
-  const breakStart = s.breakEnabled ? atMinutes(date, timeMinutes(s.breakStart)) : null;
-  const breakEnd = s.breakEnabled ? atMinutes(date, timeMinutes(s.breakEnd)) : null;
+  const hasLunch = s.breakEnabled || s.splitCountdown;
+  const breakStart = hasLunch ? atMinutes(date, timeMinutes(s.breakStart)) : null;
+  const breakEnd = hasLunch ? atMinutes(date, timeMinutes(s.breakEnd)) : null;
   return { start, end, breakStart, breakEnd, total: end - start - (s.breakEnabled ? breakEnd - breakStart : 0) };
 }
 
@@ -215,6 +218,21 @@ function recordTime(value, day) {
   return parsed;
 }
 
+// A countdown follows the wall clock even while earnings are paused or reset. Keeping
+// remainingMs as the end-of-day duration preserves the existing calculation contract.
+function nextCountdown(s, shift, current, workingDay) {
+  if (!workingDay) return { countdownMs: 0, countdownPhase: 'off', countdownLabel: '今日安排' };
+  if (current >= shift.end) return { countdownMs: 0, countdownPhase: 'finished', countdownLabel: '今日工作' };
+  let target = shift.end, phase = 'end', label = '距下班';
+  if (s.splitCountdown) {
+    if (current < shift.start) { target = shift.start; phase = 'start'; label = '距上班'; }
+    else if (current < shift.breakStart) { target = shift.breakStart; phase = 'lunch'; label = '距中午下班'; }
+    else if (current < shift.breakEnd) { target = shift.breakEnd; phase = 'afternoon'; label = '距下午上班'; }
+    else label = '距今日下班';
+  }
+  return { countdownMs: Math.max(0, target - current), countdownPhase: phase, countdownLabel: label };
+}
+
 /** Today's earnings: schedule elapsed before opening the app is included.
  * Records are scoped to one date. excludedMs must contain work time only.
  * Resetting should also clear excludedMs and pausedAt in the UI record.
@@ -246,6 +264,7 @@ export function calculate(settings, now = new Date(), record = {}) {
     workedMs,
     totalMs: shift.total,
     remainingMs: workingDay ? Math.max(0, shift.end - current) : 0,
+    ...nextCountdown(s, shift, current, workingDay),
     hourlyRate: salary / (shift.total / HOUR),
     secondRate,
     progress: workedMs / shift.total,

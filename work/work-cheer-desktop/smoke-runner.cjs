@@ -2,7 +2,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {spawn}=require('node:child_process');
 const crypto=require('node:crypto');
-const executable=path.resolve(__dirname,'dist/上班鼓励器-1.12.0-Windows-x64.exe');
+const executable=path.resolve(__dirname,'dist/上班鼓励器-1.13.0-Windows-x64.exe');
 const profile=fs.mkdtempSync(path.join(__dirname,'portable-profile-'));
 fs.writeFileSync(path.join(profile,'desktop-preferences.json'),JSON.stringify({opacity:100,alwaysOnTop:false,closeToTray:false,floating:true,floatingBounds:{x:40,y:60,width:320,height:156}}));
 const executableHash=()=>crypto.createHash('sha256').update(fs.readFileSync(executable)).digest('hex');
@@ -13,7 +13,7 @@ async function run(phase) {
   if(phase==='write')args.push('--floating');
   await new Promise((resolve,reject)=>{
     const child=spawn(executable,args,{cwd:__dirname,windowsHide:true,stdio:'pipe',env:{...process.env,TEMP:temp,TMP:temp}});
-    const timer=setTimeout(()=>{child.kill();reject(new Error('Portable '+phase+' timed out after 90 seconds'))},90000);
+    const timer=setTimeout(()=>{child.kill();reject(new Error('Portable '+phase+' timed out after 150 seconds'))},150000);
     child.stdout.on('data',chunk=>process.stdout.write(chunk));
     child.stderr.on('data',chunk=>process.stderr.write(chunk));
     child.on('error',error=>{clearTimeout(timer);reject(error)});

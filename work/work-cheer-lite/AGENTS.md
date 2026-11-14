@@ -9,3 +9,5 @@
 - 数据：`%APPDATA%\WorkCheerLite`（WebView2 资料与 preferences.json，位置为物理像素）。第一次启动若还没有自己的数据，会从完整版 `%APPDATA%\WorkCheer` 复制 localStorage（同为 Chromium 的 file:// 存储）和样式/透明度等偏好，之后两边独立。
 - 构建：`powershell -File build.ps1`；检查：`node smoke-lite.cjs`（先用完整版的 Electron 生成一份带“迁移测试”目标的数据，再用独立测试目录跑两次；窗口不可见、不动鼠标）。真实鼠标操作需用户试用。
 - 只暴露固定窗口动作，只允许导航到本地页面，DevTools 默认关闭（`--devtools` 仅调试用）。
+
+- 1.13 (user confirmed 2026-11-14): optional splitCountdown uses breakStart (中午下班) and breakEnd (下午上班) to count to noon, afternoon start, then day end. Default false for old-settings compatibility; independent of breakEnabled (unpaid lunch). Existing remainingMs and salary calculations stay unchanged; new countdownMs/countdownPhase/countdownLabel drive the UI, and .countdown[data-label] is mirrored by both desktop widget feeds. Never duplicate phase arithmetic in the widgets.

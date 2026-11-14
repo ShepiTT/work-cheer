@@ -5,7 +5,7 @@ module.exports=async function smokeFloating(api){
   const {app,session,Menu,screen,report,reportPath,phase,delay,getWindow,getPreferences,getFloating,getTrayMenu,getFloatingMenu,switchMode,secondInstance,savePreferences,persistPlacement,fitBounds,validBounds,destroyTray,floatingStyles,floatingThemes}=api;
   const js=source=>getWindow().webContents.executeJavaScript(source);
   const settle=()=>delay(350);
-  const snapshot=()=>js(`(() => {const w=document.querySelector('.floating-widget');const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};return {style:document.body.dataset.floatingStyle,htmlStyle:document.documentElement.dataset.style,width:innerWidth,height:innerHeight,sourceAmount:document.querySelector('.income-value').textContent,amount:w?.querySelector('.float-money').textContent,time:w?.querySelector('.float-time').textContent,rects:w?[...w.querySelectorAll('.float-label,.float-money,.float-time')].map(rect):[],metricCount:w?.querySelectorAll('.float-metric').length,drag:w?getComputedStyle(w).webkitAppRegion:null,bodyBackground:getComputedStyle(document.body).backgroundColor,faceBackground:w?getComputedStyle(w.querySelector('.float-face')).backgroundColor:null,rootHidden:getComputedStyle(document.getElementById('root')).display==='none',ringProgress:w?.querySelector('canvas').dataset.progress,nodeExposed:typeof require!=='undefined',state:JSON.parse(localStorage.getItem('work-cheer-v1'))}})()`);
+  const snapshot=()=>js(`(() => {const w=document.querySelector('.floating-widget');const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};return {style:document.body.dataset.floatingStyle,htmlStyle:document.documentElement.dataset.style,width:innerWidth,height:innerHeight,sourceAmount:document.querySelector('.income-value').textContent,amount:w?.querySelector('.float-money').textContent,time:w?.querySelector('.float-time').textContent,timeLabel:w?.querySelector('.float-time-group .float-label').textContent,sourceLabel:document.querySelector('.countdown')?.dataset.label,rects:w?[...w.querySelectorAll('.float-label,.float-money,.float-time')].map(rect):[],metricCount:w?.querySelectorAll('.float-metric').length,drag:w?getComputedStyle(w).webkitAppRegion:null,bodyBackground:getComputedStyle(document.body).backgroundColor,faceBackground:w?getComputedStyle(w.querySelector('.float-face')).backgroundColor:null,rootHidden:getComputedStyle(document.getElementById('root')).display==='none',ringProgress:w?.querySelector('canvas').dataset.progress,nodeExposed:typeof require!=='undefined',state:JSON.parse(localStorage.getItem('work-cheer-v1'))}})()`);
   function check(data,id){
     const design=floatingStyles[id];
     assert(data.style===id&&data.width===design.width&&data.height===design.height,'Incorrect style/viewport '+id+' '+JSON.stringify(data));
@@ -21,6 +21,7 @@ module.exports=async function smokeFloating(api){
   const select=async(id,menu=getFloatingMenu())=>{menu.getMenuItemById('style-'+id).click();await switchMode(true,false,id);await settle();};
   const replaceState=async state=>{await js(`localStorage.setItem('work-cheer-v1',${JSON.stringify(JSON.stringify(state))})`);await switchMode(false,false);await switchMode(true,false);await settle();};
   await settle();
+  const clock=async(hour,minute)=>{await js(`(() => {const D=window.__middayRealDate||(window.__middayRealDate=Date),at=new D(2026,10,4,${hour},${minute},0).getTime();window.Date=class extends D{constructor(...args){super(...(args.length?args:[at]));}static now(){return at;}};})()`);await settle();};
   report.initialPreferences=getPreferences();report.initial=await snapshot();
   check(report.initial,getPreferences().floatingStyle);
   assert(getFloating()&&getWindow().isAlwaysOnTop()&&!getWindow().isResizable(),'Floating native window flags');
@@ -93,6 +94,20 @@ module.exports=async function smokeFloating(api){
     const finished={...original,settings:{...original.settings,startTime:'00:00',endTime:'01:00',calendarOverrides:{'2026-11-04':true}},records:{}};
     await replaceState(finished);for(const id of Object.keys(floatingStyles)){await select(id);const s=await snapshot();check(s,id);assert(s.time==='已下班','Finished day '+id);}
     report.checks.restAndFinishedInAllStyles=true;
+    const split={...original,settings:{...original.settings,splitCountdown:true,startTime:'08:30',endTime:'17:00',breakEnabled:true,breakStart:'12:00',breakEnd:'13:00',calendarOverrides:{'2026-11-04':true}},records:{}};
+    await replaceState(split);
+    for(const id of Object.keys(floatingStyles)){
+      await select(id);
+      for(const [h,m,label,time] of [[11,30,'距中午下班','00:30:00'],[12,30,'距下午上班','00:30:00'],[14,0,'距今日下班','03:00:00']]){
+        await clock(h,m);const data=await snapshot();check(data,id);assert(data.timeLabel===label&&data.sourceLabel===label&&data.time===time,'Split countdown not mirrored '+id+' '+label+': '+JSON.stringify(data));
+      }
+    }
+    for(const [theme] of floatingThemes){
+      getFloatingMenu().getMenuItemById('theme-'+theme).click();await switchMode(true,false);
+      for(const id of Object.keys(floatingStyles)){await select(id);await clock(12,30);const data=await snapshot();check(data,id);assert(data.timeLabel==='距下午上班','Theme lost midday label '+theme+' '+id);}
+    }
+    report.checks.middayPhasesInEveryStyleAndTheme=true;
+
     await replaceState(original);
     await select('capsule',getTrayMenu());assert(getPreferences().floatingStyle==='capsule','Tray style selection');
     await secondInstance(['app','--floating-style=transparent']);check(await snapshot(),'transparent');report.checks.trayAndSecondInstanceStyleSelection=true;

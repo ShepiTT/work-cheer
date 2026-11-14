@@ -104,6 +104,24 @@ namespace WorkCheerLite
             await Task.Delay(300);
             Assert(app.LastFloat.Style == followed && app.Prefs.FloatingTheme == "", "follow main window: " + app.LastFloat.Style);
             checks["widgetThemeIndependentOfMainWindow"] = true;
+            // Reload this isolated test profile with split-countdown settings; the real profile is never touched.
+            var saved = await app.Main.Eval("localStorage.getItem('work-cheer-v1')");
+            var setup = "(() => {const d=JSON.parse(localStorage.getItem('work-cheer-v1'));Object.assign(d.settings,{splitCountdown:true,startTime:'08:30',endTime:'17:00',breakEnabled:true,breakStart:'12:00',breakEnd:'13:00',workdays:[0,1,2,3,4,5,6],useChinaHolidays:false,calendarOverrides:{}});d.records={};localStorage.setItem('work-cheer-v1',JSON.stringify(d));location.reload();})()";
+            await app.Main.Eval(setup);await Task.Delay(1200);
+            foreach (var style in Prefs.Styles)
+            {
+                app.SwitchMode(true, style);
+                var hours = new[] {11,12,14};var labels = new[] {"距中午下班","距下午上班","距今日下班"};var times = new[] {"00:30:00","00:30:00","03:00:00"};
+                for(var phaseIndex=0;phaseIndex<hours.Length;phaseIndex++)
+                {
+                    var minutes=phaseIndex==2?0:30;
+                    await app.Main.Eval("(() => {const D=window.__middayRealDate||(window.__middayRealDate=Date),at=new D(2026,10,4,"+hours[phaseIndex]+","+minutes+",0).getTime();window.Date=class extends D{constructor(...args){super(...(args.length?args:[at]));}static now(){return at;}};})()");
+                    await Until(()=>app.LastFloat.Label==labels[phaseIndex]&&app.LastFloat.Time==times[phaseIndex],5000,"midday phase not mirrored "+style+" "+labels[phaseIndex]);
+                    using(var shot=app.Float.Snapshot())Assert(Coverage(shot)>.04,"empty midday widget");
+                }
+            }
+            checks["middayPhasesInEveryStyle"] = true;
+            await app.Main.Eval("localStorage.setItem('work-cheer-v1',"+saved+");location.reload();");await Task.Delay(1200);
             app.SwitchMode(false, null);
             await Task.Delay(300);
             Assert(app.Main.Visible && !app.Float.Visible, "did not return to the full window");

@@ -88,7 +88,7 @@
       const message = {
         type: 'float', earned: value.toFixed(2),
         time: off ? '休息日' : finished ? '已下班' : parts.length === 3 ? parts.join(':') : '00:00:00',
-        label: off ? '今日安排' : finished ? '今日工作' : '距下班',
+        label: off ? '今日安排' : finished ? '今日工作' : document.querySelector('.countdown')?.dataset.label || '距下班',
         live: Boolean(status?.classList.contains('working')),
         progress: Math.max(0, Math.min(1, Number.isFinite(progress) ? progress / 100 : 0)),
         style: widgetTheme || root.dataset.style || 'glass', scheme: root.dataset.scheme || 'light',

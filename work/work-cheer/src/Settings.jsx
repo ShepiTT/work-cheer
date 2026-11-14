@@ -74,11 +74,13 @@ export function Settings({ settings, onSave, onClose, onPreviewTheme }) {
             <label className="field">上班时间<input type="time" name="startTime" value={draft.startTime} onInput={e=>field('startTime',e.currentTarget.value)} onChange={e=>field('startTime',e.target.value)}/></label>
             <label className="field">下班时间<input type="time" name="endTime" value={draft.endTime} onInput={e=>field('endTime',e.currentTarget.value)} onChange={e=>field('endTime',e.target.value)}/></label>
           </div>
+          <div className="break-switch"><div><span>午间分段倒计时</span><p>上午等中午下班，午休等下午上班，下午等今日下班</p></div><button type="button" role="switch" aria-checked={draft.splitCountdown} aria-label="午间分段倒计时" className={'switch '+(draft.splitCountdown?'checked':'')} onClick={()=>field('splitCountdown',!draft.splitCountdown)}><span/></button></div>
           <div className="break-switch"><div><span>扣除午休</span><p>午休期间暂停累计工时与收入</p></div><button type="button" role="switch" aria-checked={draft.breakEnabled} aria-label="扣除午休" className={'switch '+(draft.breakEnabled?'checked':'')} onClick={()=>field('breakEnabled',!draft.breakEnabled)}><span/></button></div>
-          {draft.breakEnabled&&<div className="field-row break-times">
-            <label className="field">午休开始<input type="time" name="breakStart" value={draft.breakStart} onInput={e=>field('breakStart',e.currentTarget.value)} onChange={e=>field('breakStart',e.target.value)}/></label>
-            <label className="field">午休结束<input type="time" name="breakEnd" value={draft.breakEnd} onInput={e=>field('breakEnd',e.currentTarget.value)} onChange={e=>field('breakEnd',e.target.value)}/></label>
+          {(draft.breakEnabled||draft.splitCountdown)&&<div className="field-row break-times">
+            <label className="field">{draft.splitCountdown?'中午下班':'午休开始'}<input type="time" name="breakStart" value={draft.breakStart} onInput={e=>field('breakStart',e.currentTarget.value)} onChange={e=>field('breakStart',e.target.value)}/></label>
+            <label className="field">{draft.splitCountdown?'下午上班':'午休结束'}<input type="time" name="breakEnd" value={draft.breakEnd} onInput={e=>field('breakEnd',e.currentTarget.value)} onChange={e=>field('breakEnd',e.target.value)}/></label>
           </div>}
+          {draft.splitCountdown&&<p className="field-note">分段倒计时不改变工资算法；是否扣除午休工时，由上面的“扣除午休”决定。</p>}
           <div className="goal-section"><span className="section-label">给努力一个小目标</span><div className="field-row goal-fields">
             <label className="field">想奖励自己<input maxLength={16} value={draft.goalName} onChange={e=>field('goalName',e.target.value)}/></label>
             <label className="field">目标金额（元）<input type="number" min="0.01" max="1000000" step="0.01" value={draft.goalAmount} onChange={e=>field('goalAmount',e.target.value)}/></label>

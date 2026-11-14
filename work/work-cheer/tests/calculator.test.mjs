@@ -514,3 +514,84 @@ test('calendar previews tolerate unfinished salary fields and an empty draft wor
   assert.throws(() => isWorkday(draft, date('12:00:00')), RangeError);
   assert.throws(() => getCalendarDay({ ...draft, calendarOverrides: { '2026-02-30': true } }, date('12:00:00')), RangeError);
 });
+
+
+test('split countdown changes at the exact shift and lunch boundaries', () => {
+  const settings = { splitCountdown: true };
+  for (const [clock, phase, label, ms] of [
+    ['08:29:59.999', 'start', '距上班', 1],
+    ['08:30:00', 'lunch', '距中午下班', 3.5 * HOUR],
+    ['11:59:59.999', 'lunch', '距中午下班', 1],
+    ['12:00:00', 'afternoon', '距下午上班', HOUR],
+    ['12:59:59.999', 'afternoon', '距下午上班', 1],
+    ['13:00:00', 'end', '距今日下班', 4 * HOUR],
+    ['16:59:59.999', 'end', '距今日下班', 1],
+    ['17:00:00', 'finished', '今日工作', 0],
+  ]) {
+    const stats = calculate(settings, date(clock));
+    assert.equal(stats.countdownPhase, phase, clock);
+    assert.equal(stats.countdownLabel, label, clock);
+    assert.equal(stats.countdownMs, ms, clock);
+  }
+});
+
+test('split countdown uses custom noon-off and afternoon-start times', () => {
+  const settings = { splitCountdown: true, startTime: '09:00', breakStart: '11:45', breakEnd: '14:15', endTime: '18:30' };
+  assert.equal(calculate(settings, date('11:30:00')).countdownMs, 15 * MINUTE);
+  assert.equal(calculate(settings, date('12:15:00')).countdownMs, 2 * HOUR);
+  assert.equal(calculate(settings, date('14:15:00')).countdownMs, 4.25 * HOUR);
+});
+
+test('countdown selection never changes paid or unpaid lunch earnings and records', () => {
+  for (const breakEnabled of [false, true]) {
+    for (const salaryMode of ['daily', 'monthly']) {
+      const settings = { breakEnabled, salaryMode };
+      const record = { resetAt: date('09:00:00').getTime(), excludedMs: 10 * MINUTE };
+      for (const clock of ['11:30:00', '12:30:00', '14:00:00', '17:30:00']) {
+        const old = calculate(settings, date(clock), record);
+        const split = calculate({ ...settings, splitCountdown: true }, date(clock), record);
+        for (const key of ['earned', 'workedMs', 'totalMs', 'remainingMs', 'progress', 'hourlyRate', 'secondRate', 'dayTotal']) assert.equal(split[key], old[key], key);
+      }
+      assert.equal(monthlyEarnings({ ...settings, splitCountdown: true }, date('14:00:00')), monthlyEarnings(settings, date('14:00:00')));
+    }
+  }
+});
+
+test('manual pause and reset freeze earnings but do not freeze the next scheduled transition', () => {
+  const settings = { splitCountdown: true, breakEnabled: true };
+  const record = { pausedAt: date('11:15:00').getTime(), resetAt: date('10:00:00').getTime() };
+  const morning = calculate(settings, date('11:59:00'), record);
+  const lunch = calculate(settings, date('12:30:00'), record);
+  const afternoon = calculate(settings, date('14:00:00'), record);
+  assert.equal(morning.countdownMs, MINUTE);
+  assert.equal(lunch.countdownMs, 30 * MINUTE);
+  assert.equal(lunch.countdownLabel, '距下午上班');
+  assert.equal(afternoon.countdownMs, 3 * HOUR);
+  assert.equal(morning.earned, lunch.earned);
+  assert.equal(lunch.earned, afternoon.earned);
+  assert.equal(lunch.status, 'paused');
+});
+
+test('rest days and official holidays suppress split countdown, makeup and overrides restore it', () => {
+  for (const day of [new Date('2026-11-08T11:00:00'), new Date('2026-10-01T11:00:00')]) {
+    const off = calculate({ splitCountdown: true }, day);
+    assert.equal(off.countdownPhase, 'off');
+    assert.equal(off.countdownMs, 0);
+    const on = calculate({ splitCountdown: true, calendarOverrides: { [dateKey(day)]: true } }, day);
+    assert.equal(on.countdownPhase, 'lunch');
+    assert.equal(on.countdownMs, HOUR);
+  }
+  assert.equal(calculate({ splitCountdown: true }, new Date('2026-10-10T11:00:00')).countdownPhase, 'lunch');
+});
+
+test('old settings keep their countdown and allow schedules that have no lunch', () => {
+  const old = { startTime: '06:00', endTime: '10:00', breakEnabled: false };
+  assert.deepEqual(validateSettings(old), []);
+  const stats = calculate(old, date('09:00:00'));
+  assert.equal(stats.countdownMs, stats.remainingMs);
+  assert.equal(stats.countdownLabel, '距下班');
+  assert.ok(validateSettings({ ...old, splitCountdown: true }).length);
+  assert.ok(validateSettings({ splitCountdown: 'yes' }).length);
+  assert.ok(validateSettings({ splitCountdown: true, breakStart: '13:00', breakEnd: '12:00' }).length);
+  assert.ok(validateSettings({ splitCountdown: true, breakEnd: '19:00' }).length);
+});

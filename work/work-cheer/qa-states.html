@@ -16,6 +16,9 @@ const theme = query.get('theme') || 'glass', color = query.get('color') || 'blue
 const width = Number(query.get('width')) || 620, height = Number(query.get('height')) || 940, scale = Number(query.get('scale')) || .4;
 const day = '2026-11-05', at = time => `${day}T${time}+08:00`;
 const states = [
+  ['midday-morning', '距中午下班', { at: at('11:30:00'), settings: { splitCountdown: true, breakEnabled: true } }],
+  ['midday-break', '午休 · 距下午上班', { at: at('12:30:00'), settings: { splitCountdown: true, breakEnabled: true } }],
+  ['midday-afternoon', '距今日下班', { at: at('14:00:00'), settings: { splitCountdown: true, breakEnabled: true } }],
   ['working', '上班中', { at: at('14:32:08') }],
   ['before', '待上班', { at: at('07:30:00') }],
   ['break', '午休中', { at: at('12:10:00'), settings: { breakEnabled: true, breakStart: '12:00', breakEnd: '13:00' } }],
