@@ -9,6 +9,9 @@
     <a href="#本地开发">本地开发</a> ·
     <a href="docs/DEVELOPMENT.md">开发说明</a>
   </p>
+  <p>
+    <a href="README.en.md">🌐 English</a>
+  </p>
 </div>
 
 ![三种主题的主界面：玻璃、小组件、纸墨](docs/images/overview.png)
