@@ -9,4 +9,5 @@ contextBridge.exposeInMainWorld('workCheerWindow',{
     ipcRenderer.on('work-cheer-window-maximized',listener);
     return ()=>ipcRenderer.removeListener('work-cheer-window-maximized',listener);
   },
+  setLanguage(lang){if(lang==='en'||lang==='zh')ipcRenderer.send('work-cheer-language',lang);},
 });

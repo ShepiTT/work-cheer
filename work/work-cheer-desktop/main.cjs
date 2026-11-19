@@ -3,14 +3,106 @@ const fs = require('node:fs');
 const path = require('node:path');
 const VERSION = '1.13.0';
 const mountFloating = require('./floating-renderer.cjs');
-const floatingStyles = {
-  capsule:{label:'极简胶囊',width:360,height:64},
-  transparent:{label:'透明悬字',width:280,height:180},
-  ring:{label:'倒计时圆环',width:200,height:200}
+
+// Internationalization for native menus
+const menuI18n = {
+  zh: {
+    appTitle: '上班鼓励器',
+    floatingAlwaysTop: '悬浮窗始终置顶',
+    alwaysTop: '始终置顶',
+    returnToFull: '返回完整窗口',
+    enterFloating: '进入悬浮窗',
+    floatingStyle: '悬浮窗样式',
+    capsule: '极简胶囊',
+    transparent: '透明悬字',
+    ring: '倒计时圆环',
+    floatingTheme: '悬浮窗主题',
+    followMain: '跟随主窗口',
+    themeGlass: '玻璃',
+    themeWidgets: '小组件',
+    themeZhimo: '纸墨',
+    themePixel: '像素',
+    themeCyber: '赛博朋克',
+    themeY2k: '千禧',
+    themeClay: '黏土',
+    themeLcd: '液晶',
+    settings: '设置',
+    opacity: '窗口透明度',
+    hideToTray: '收起到托盘',
+    closeToTray: '关闭窗口时收起到托盘',
+    zoomIn: '放大',
+    zoomOut: '缩小',
+    resetZoom: '恢复原始大小',
+    minimize: '最小化',
+    quit: '退出',
+    window: '窗口',
+    help: '帮助',
+    about: '关于上班鼓励器',
+    aboutTitle: '关于上班鼓励器',
+    aboutDetail: '实时收入估算 · 下班倒计时 · 悬浮窗 · 托盘与透明度\n\n按住窗口顶部或卡片外的空白处可移动窗口；悬浮窗按住即可拖动，右键或按 Esc 返回完整窗口。\n工资与作息数据仅保存在本机当前 Windows 账户，收入仅为估算。\n\n桌面交互参考 WizzenH/xindong（MIT）。\n保存位置：',
+    ok: '知道了',
+    showWindow: '显示窗口',
+  },
+  en: {
+    appTitle: 'Work Cheer',
+    floatingAlwaysTop: 'Widget Always on Top',
+    alwaysTop: 'Always on Top',
+    returnToFull: 'Return to Full Window',
+    enterFloating: 'Enter Floating Widget',
+    floatingStyle: 'Widget Style',
+    capsule: 'Minimal Capsule',
+    transparent: 'Transparent Text',
+    ring: 'Countdown Ring',
+    floatingTheme: 'Widget Theme',
+    followMain: 'Follow Main Window',
+    themeGlass: 'Glass',
+    themeWidgets: 'Widgets',
+    themeZhimo: 'Paper & Ink',
+    themePixel: 'Pixel',
+    themeCyber: 'Cyberpunk',
+    themeY2k: 'Y2K',
+    themeClay: 'Clay',
+    themeLcd: 'LCD',
+    settings: 'Settings',
+    opacity: 'Window Opacity',
+    hideToTray: 'Hide to Tray',
+    closeToTray: 'Hide to Tray on Close',
+    zoomIn: 'Zoom In',
+    zoomOut: 'Zoom Out',
+    resetZoom: 'Reset Zoom',
+    minimize: 'Minimize',
+    quit: 'Quit',
+    window: 'Window',
+    help: 'Help',
+    about: 'About Work Cheer',
+    aboutTitle: 'About Work Cheer',
+    aboutDetail: 'Real-time earnings · Countdown · Floating widgets · Tray & opacity\n\nDrag the top bar or area outside cards to move; drag floating widgets directly. Right-click or press Esc to return.\nData saved locally in current Windows account; earnings are estimates only.\n\nDesktop features inspired by WizzenH/xindong (MIT).\nData location: ',
+    ok: 'OK',
+    showWindow: 'Show Window',
+  },
 };
-const validStyle = value => Object.hasOwn(floatingStyles,value) ? value : 'capsule';
-// 1.12: the floating widget may wear its own 主题 ('' follows the main window); colour and appearance always follow.
-const floatingThemes = [['glass','玻璃'],['widgets','小组件'],['zhimo','纸墨'],['pixel','像素'],['cyber','赛博朋克'],['y2k','千禧'],['clay','黏土'],['lcd','液晶']];
+
+let currentLang = 'zh';
+const T = () => menuI18n[currentLang] || menuI18n.zh;
+
+const floatingStylesBase = {
+  capsule: { width: 360, height: 64 },
+  transparent: { width: 280, height: 180 },
+  ring: { width: 200, height: 200 },
+};
+const getFloatingStyles = () => ({
+  capsule: { label: T().capsule, ...floatingStylesBase.capsule },
+  transparent: { label: T().transparent, ...floatingStylesBase.transparent },
+  ring: { label: T().ring, ...floatingStylesBase.ring },
+});
+const floatingStyles = getFloatingStyles();
+const validStyle = value => Object.hasOwn(floatingStylesBase, value) ? value : 'capsule';
+
+const getFloatingThemes = () => [
+  ['glass', T().themeGlass], ['widgets', T().themeWidgets], ['zhimo', T().themeZhimo], ['pixel', T().themePixel],
+  ['cyber', T().themeCyber], ['y2k', T().themeY2k], ['clay', T().themeClay], ['lcd', T().themeLcd],
+];
+const floatingThemes = getFloatingThemes();
 const validTheme = value => floatingThemes.some(([id]) => id === value) ? value : '';
 const smoke = process.argv.includes('--smoke-test');
 const argument = (name, fallback) => process.argv.find(v => v.startsWith(name + '='))?.slice(name.length + 1) || fallback;
@@ -109,6 +201,12 @@ ipcMain.on('work-cheer-window',(event,action)=>{
   else if(action==='floating')switchMode(true,!smoke).catch(fail);
   else if(action==='menu'&&!smoke)windowMenu.popup({window:win});
 });
+// Language sync from renderer: update native menus when user changes language in settings.
+ipcMain.on('work-cheer-language',(event,lang)=>{
+  const win=BrowserWindow.fromWebContents(event.sender);
+  if(!win||win!==mainWindow||win.isDestroyed()||event.senderFrame!==win.webContents.mainFrame)return;
+  if(lang==='en'||lang==='zh'){currentLang=lang;refreshMenus();}
+});
 function showWindow() {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   if (mainWindow.isMinimized()) mainWindow.restore();
@@ -132,30 +230,35 @@ function quitApp(){isQuitting=true;app.quit();}
 function destroyTray(){if(tray&&!tray.isDestroyed())tray.destroy();}
 function refreshMenus() {
   if (!mainWindow || mainWindow.isDestroyed()) return;
+  const t = T();
+  const themes = getFloatingThemes();
+  const styles = getFloatingStyles();
   const hasTray=Boolean(tray&&!tray.isDestroyed());
-  const topItem=()=>({id:'always-top',label:currentFloating?'悬浮窗始终置顶':'始终置顶',type:'checkbox',checked:currentFloating||preferences.alwaysOnTop,enabled:!currentFloating,click:item=>updatePreference({alwaysOnTop:item.checked})});
-  const modeItem=()=>({id:'floating-mode',label:currentFloating?'返回完整窗口':'进入悬浮窗',click:()=>switchMode(!currentFloating,!smoke)});
-  const styleItem=()=>({id:'floating-styles',label:'悬浮窗样式',submenu:Object.entries(floatingStyles).map(([id,design])=>({id:'style-'+id,label:design.label,type:'radio',checked:preferences.floatingStyle===id,click:()=>switchMode(true,!smoke,id)}))});
-  // The separator splits Electron's radio groups; every pick rebuilds the menus (pickTheme → createWindow), so one tick stays.
+  const topItem=()=>({id:'always-top',label:currentFloating?t.floatingAlwaysTop:t.alwaysTop,type:'checkbox',checked:currentFloating||preferences.alwaysOnTop,enabled:!currentFloating,click:item=>updatePreference({alwaysOnTop:item.checked})});
+  const modeItem=()=>({id:'floating-mode',label:currentFloating?t.returnToFull:t.enterFloating,click:()=>switchMode(!currentFloating,!smoke)});
+  const styleItem=()=>({id:'floating-styles',label:t.floatingStyle,submenu:Object.entries(styles).map(([id,design])=>({id:'style-'+id,label:design.label,type:'radio',checked:preferences.floatingStyle===id,click:()=>switchMode(true,!smoke,id)}))});
   const themeRadio=([id,label])=>({id:'theme-'+(id||'follow'),label,type:'radio',checked:preferences.floatingTheme===id,click:()=>pickTheme(id)});
-  const themeItem=()=>({id:'floating-themes',label:'悬浮窗主题',submenu:[themeRadio(['','跟随主窗口']),{type:'separator'},...floatingThemes.map(themeRadio)]});
-  const aboutItem={label:'关于上班鼓励器',click:()=>dialog.showMessageBox(mainWindow,{type:'info',title:'关于上班鼓励器',message:'上班鼓励器 '+VERSION,
-    detail:'实时收入估算 · 下班倒计时 · 悬浮窗 · 托盘与透明度\n\n按住窗口顶部或卡片外的空白处可移动窗口；悬浮窗按住即可拖动，右键或按 Esc 返回完整窗口。\n工资与作息数据仅保存在本机当前 Windows 账户，收入仅为估算。\n\n桌面交互参考 WizzenH/xindong（MIT）。\n保存位置：'+app.getPath('userData'),buttons:['知道了']})};
-  const windowItems=()=>[modeItem(),styleItem(),themeItem(),{id:'settings',label:'设置',click:openSettings},topItem(),
-    {label:'窗口透明度',submenu:opacityChoices.map(value=>({id:'opacity-'+value,label:value+'%',type:'radio',checked:preferences.opacity===value,click:()=>updatePreference({opacity:value})}))},
-    {type:'separator'},{id:'hide-to-tray',label:'收起到托盘',enabled:hasTray,click:hideToTray},
-    {id:'close-to-tray',label:'关闭窗口时收起到托盘',type:'checkbox',checked:preferences.closeToTray,enabled:hasTray,click:item=>updatePreference({closeToTray:item.checked})},
-    {type:'separator'},{label:'放大',role:'zoomIn',enabled:!currentFloating},{label:'缩小',role:'zoomOut',enabled:!currentFloating},{label:'恢复原始大小',role:'resetZoom',enabled:!currentFloating},
-    {type:'separator'},{label:'最小化',role:'minimize'},{id:'quit',label:'退出',click:quitApp}];
-  // No menu bar is drawn (frameless window); the application menu keeps its shortcuts and the ⋯ button pops windowMenu.
-  Menu.setApplicationMenu(Menu.buildFromTemplate([{label:'窗口',submenu:windowItems()},{label:'帮助',submenu:[aboutItem]}]));
+  const themeItem=()=>({id:'floating-themes',label:t.floatingTheme,submenu:[themeRadio(['',t.followMain]),{type:'separator'},...themes.map(themeRadio)]});
+  const aboutItem={label:t.about,click:()=>dialog.showMessageBox(mainWindow,{type:'info',title:t.aboutTitle,message:t.appTitle+' '+VERSION,
+    detail:t.aboutDetail+app.getPath('userData'),buttons:[t.ok]})};
+  const windowItems=()=>[modeItem(),styleItem(),themeItem(),{id:'settings',label:t.settings,click:openSettings},topItem(),
+    {label:t.opacity,submenu:opacityChoices.map(value=>({id:'opacity-'+value,label:value+'%',type:'radio',checked:preferences.opacity===value,click:()=>updatePreference({opacity:value})}))},
+    {type:'separator'},{id:'hide-to-tray',label:t.hideToTray,enabled:hasTray,click:hideToTray},
+    {id:'close-to-tray',label:t.closeToTray,type:'checkbox',checked:preferences.closeToTray,enabled:hasTray,click:item=>updatePreference({closeToTray:item.checked})},
+    {type:'separator'},{label:t.zoomIn,role:'zoomIn',enabled:!currentFloating},{label:t.zoomOut,role:'zoomOut',enabled:!currentFloating},{label:t.resetZoom,role:'resetZoom',enabled:!currentFloating},
+    {type:'separator'},{label:t.minimize,role:'minimize'},{id:'quit',label:t.quit,click:quitApp}];
+  Menu.setApplicationMenu(Menu.buildFromTemplate([{label:t.window,submenu:windowItems()},{label:t.help,submenu:[aboutItem]}]));
   const items=windowItems();
   windowMenu=Menu.buildFromTemplate([...items.slice(0,-1),aboutItem,items.at(-1)]);
   mainWindow.setMenu(currentFloating?null:Menu.getApplicationMenu());
-  floatingMenu=Menu.buildFromTemplate([styleItem(),themeItem(),{type:'separator'},{id:'float-full',label:'返回完整窗口',accelerator:'Esc',click:()=>switchMode(false,!smoke)},
-    {id:'float-settings',label:'设置',click:openSettings},{id:'float-hide',label:'收起到托盘',enabled:hasTray,click:hideToTray},{type:'separator'},{id:'float-quit',label:'退出',click:quitApp}]);
-  if(hasTray){trayMenu=Menu.buildFromTemplate([{id:'tray-show',label:'显示窗口',click:showWindow},modeItem(),styleItem(),themeItem(),{id:'tray-hide',label:'收起到托盘',enabled:mainWindow.isVisible(),click:hideToTray},
-    {id:'tray-settings',label:'设置',click:openSettings},topItem(),{type:'separator'},{id:'tray-quit',label:'退出',click:quitApp}]);tray.setContextMenu(trayMenu);}
+  floatingMenu=Menu.buildFromTemplate([styleItem(),themeItem(),{type:'separator'},{id:'float-full',label:t.returnToFull,accelerator:'Esc',click:()=>switchMode(false,!smoke)},
+    {id:'float-settings',label:t.settings,click:openSettings},{id:'float-hide',label:t.hideToTray,enabled:hasTray,click:hideToTray},{type:'separator'},{id:'float-quit',label:t.quit,click:quitApp}]);
+  if(hasTray){
+    trayMenu=Menu.buildFromTemplate([{id:'tray-show',label:t.showWindow,click:showWindow},modeItem(),styleItem(),themeItem(),{id:'tray-hide',label:t.hideToTray,enabled:mainWindow.isVisible(),click:hideToTray},
+      {id:'tray-settings',label:t.settings,click:openSettings},topItem(),{type:'separator'},{id:'tray-quit',label:t.quit,click:quitApp}]);
+    tray.setContextMenu(trayMenu);
+    tray.setToolTip(t.appTitle);
+  }
 }
 async function createWindow(floating, shouldShow, style, theme='') {
   const savedFloating=preferences.floatingBoundsByStyle[style]||preferences.floatingBounds;

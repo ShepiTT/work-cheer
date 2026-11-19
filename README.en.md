@@ -90,6 +90,7 @@ All images above are actual app renders or isolated previews using demo salary d
 | Appearance | 8 themes × 8 colors; supports light, dark, and auto modes |
 | Windows Features | 3 floating widget styles × 8 independent themes, custom title bar, tray, always-on-top, transparency, position memory |
 | Local Storage | Salary, schedule, and records are saved in your current browser or local account; no cloud sync |
+| Language | Simplified Chinese and English UI; switch in Settings |
 
 ## Calendar & Calculation Rules
 
