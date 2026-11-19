@@ -10,12 +10,32 @@ module.exports = function mountFloating(style, theme) {
     hold();new MutationObserver(hold).observe(html, {attributes: true, attributeFilter: ['data-style']});
   }
   document.body.dataset.floatingStyle = style;
+  const isEnglish = html.lang === 'en' || (document.querySelector('[data-lang="en"]') !== null);
+  const labels = isEnglish ? {
+    ariaLabel: "Today's earnings and countdown",
+    earned: 'Earned',
+    countdown: 'Clock Out',
+    restDay: 'Day Off',
+    finished: 'Done',
+    todayPlan: 'Today',
+    todayWork: "Today's Work",
+    earningsAria: (amount) => 'Earned today ' + amount + ' yuan',
+  } : {
+    ariaLabel: '今日收入与下班倒计时',
+    earned: '今日已赚',
+    countdown: '距下班',
+    restDay: '休息日',
+    finished: '已下班',
+    todayPlan: '今日安排',
+    todayWork: '今日工作',
+    earningsAria: (amount) => '今日已赚 ' + amount + ' 元',
+  };
   const widget = document.createElement('aside');
   widget.className = 'floating-widget';
-  widget.setAttribute('aria-label', '今日收入与下班倒计时');
+  widget.setAttribute('aria-label', labels.ariaLabel);
   widget.innerHTML = `<div class="float-face"><canvas class="float-ring" aria-hidden="true"></canvas>
-    <div class="float-metric float-money-group"><span class="float-label"><i class="float-live" aria-hidden="true"></i>今日已赚</span><span class="float-money"><span class="float-currency">¥</span><span class="float-integer">0</span><span class="float-decimal">.00</span></span></div>
-    <div class="float-metric float-time-group"><span class="float-label">距下班</span><span class="float-time">00:00:00</span></div>
+    <div class="float-metric float-money-group"><span class="float-label"><i class="float-live" aria-hidden="true"></i>${labels.earned}</span><span class="float-money"><span class="float-currency">¥</span><span class="float-integer">0</span><span class="float-decimal">.00</span></span></div>
+    <div class="float-metric float-time-group"><span class="float-label">${labels.countdown}</span><span class="float-time">00:00:00</span></div>
     <span class="float-progress" aria-hidden="true"><i></i></span></div>`;
   document.body.append(widget);
   const root = document.getElementById('root');root.setAttribute('aria-hidden', 'true');
@@ -221,18 +241,26 @@ module.exports = function mountFloating(style, theme) {
 
   const ghost = text => text.replace(/\d/g, '8');
   function sync() {
+    const currentLang = html.lang === 'en' || (document.querySelector('[data-lang="en"]') !== null);
+    const L = currentLang ? {
+      restDay: 'Day Off', finished: 'Done', todayPlan: 'Today', todayWork: "Today's Work", countdown: 'Clock Out',
+      earningsAria: (amount) => 'Earned today ' + amount + ' yuan',
+    } : {
+      restDay: '休息日', finished: '已下班', todayPlan: '今日安排', todayWork: '今日工作', countdown: '距下班',
+      earningsAria: (amount) => '今日已赚 ' + amount + ' 元',
+    };
     const raw = Number(document.querySelector('.income-value')?.textContent), value = Number.isFinite(raw) ? Math.max(0, raw) : 0;
     const parts = value.toFixed(2).split('.');integer.textContent = parts[0];decimal.textContent = '.' + parts[1];
     integer.dataset.ghost = ghost(parts[0]);decimal.dataset.ghost = '.88';
-    amount.setAttribute('aria-label', '今日已赚 ' + value.toFixed(2) + ' 元');
+    amount.setAttribute('aria-label', L.earningsAria(value.toFixed(2)));
     widget.classList.toggle('large-amount', value >= 10000);widget.classList.toggle('very-large-amount', value >= 1000000);
     widget.dataset.digits = String(parts[0].length);
     const source = document.querySelector('.countdown'), status = document.querySelector('.status');
     const off = status?.classList.contains('off'), finished = status?.classList.contains('finished');
     const values = [...(source?.querySelectorAll(':scope > span') || [])].map(node => node.textContent.padStart(2, '0'));
-    timer.textContent = off ? '休息日' : finished ? '已下班' : values.length === 3 ? values.join(':') : '00:00:00';
+    timer.textContent = off ? L.restDay : finished ? L.finished : values.length === 3 ? values.join(':') : '00:00:00';
     timer.dataset.ghost = off || finished ? '' : '88:88:88';
-    timeLabel.textContent = off ? '今日安排' : finished ? '今日工作' : source?.dataset.label || '距下班';
+    timeLabel.textContent = off ? L.todayPlan : finished ? L.todayWork : source?.dataset.label || L.countdown;
     widget.dataset.status = off ? 'off' : finished ? 'finished' : 'counting';
     widget.dataset.live = status?.classList.contains('working') ? 'on' : 'off';
     const reported = Number(document.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow'));
