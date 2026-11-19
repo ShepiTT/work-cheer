@@ -1,5 +1,5 @@
 import React, { useEffect, useState, createContext, useContext } from 'react';
-import { GearSix, Check, Pause, Play, ArrowCounterClockwise, Coffee, PictureInPicture, DotsThree, Minus, Square, Copy, X } from '@phosphor-icons/react';
+import { GearSix, Check, Pause, Play, ArrowCounterClockwise, Coffee, PictureInPicture, DotsThree, Minus, Square, Copy, X, PencilSimple } from '@phosphor-icons/react';
 import { DEFAULT_SETTINGS, calculate, monthlyEarnings, countWorkMs, dateKey, validateSettings, getCalendarDay } from './calculator.js';
 
 import { Modal } from './Modal.jsx';
@@ -98,7 +98,10 @@ export function App() {
   const lang = normalizeLanguage(settings.language);
   const T = getTranslation(lang);
   useEffect(() => { applyLook(previewLook || settings, prefersDark); }, [previewLook, settings, prefersDark]);
-  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
+  useEffect(() => { 
+    document.documentElement.lang = lang;
+    if (desktopWindow?.setLanguage) desktopWindow.setLanguage(lang);
+  }, [lang]);
   const key = dateKey(now);
   const record = records[key] || EMPTY_RECORD;
   const stats = calculate(settings, now, record);
@@ -145,12 +148,16 @@ export function App() {
   else if (goalReached) encouragementParts = T.encourageGoalReached(settings.goalName);
   else if (stats.status === 'paused') encouragementParts = T.encouragePaused();
   else if (stats.status === 'finished') encouragementParts = T.encourageFinished(money(stats.earned));
-  else {
-    const minutes = Math.max(1, Math.ceil((settings.goalAmount - stats.earned) / stats.secondRate / 60));
-    const timeText = T.timeFormat(Math.floor(minutes / 60), minutes % 60);
+  else if (stats.secondRate <= 0) {
+    encouragementParts = T.encourageWorking('--', settings.goalName);
+  } else {
+    const remaining = settings.goalAmount - stats.earned;
+    const minutes = remaining > 0 ? Math.max(1, Math.ceil(remaining / stats.secondRate / 60)) : 0;
+    const timeText = minutes > 0 ? T.timeFormat(Math.floor(minutes / 60), minutes % 60) : '--';
     encouragementParts = T.encourageWorking(timeText, settings.goalName);
   }
   const encouragement = <>{encouragementParts[0]}<strong>{encouragementParts[1]}</strong>{encouragementParts[2]}</>;
+  function openGoalSettings() { setModal('settings'); setTimeout(() => document.getElementById('settings-tab-0')?.click(), 50); }
   const dateDisplay = T.dateFormat(now.getMonth() + 1, now.getDate());
   const weekdayDisplay = lang === 'en' ? T.weekdays[now.getDay()] : T.weekdayPrefix + T.weekdays[now.getDay()];
   return <LanguageContext.Provider value={lang}>
@@ -173,7 +180,7 @@ export function App() {
       </section>
       <Rings work={Math.min(100, progress)} goal={stats.status === 'off' ? 0 : goalPercent}/>
       <section className={'goal' + (goalReached ? ' reached' : '')} aria-label={T.goalLabel}>
-        <div className="goal-head"><span className="goal-name">{goalReached && <Check size={14} weight="bold"/>}{T.miniGoal} · <b>{settings.goalName}</b></span>{stats.status !== 'off' && <span className="goal-amount">¥{money(Math.min(stats.earned, settings.goalAmount))} / ¥{money(settings.goalAmount)}</span>}</div>
+        <div className="goal-head"><span className="goal-name">{goalReached && <Check size={14} weight="bold"/>}{T.miniGoal} · <b>{settings.goalName}</b><button type="button" className="goal-edit" onClick={openGoalSettings} aria-label={T.editGoal} title={T.editGoal}><PencilSimple size={13} weight="bold"/></button></span>{stats.status !== 'off' && <span className="goal-amount">¥{money(Math.min(stats.earned, settings.goalAmount))} / ¥{money(settings.goalAmount)}</span>}</div>
         {stats.status !== 'off' && <div className="goal-track" aria-hidden="true"><span style={{ '--goal': goalPercent / 100 }}/></div>}
         <p className="encouragement">{encouragement}</p>
       </section>

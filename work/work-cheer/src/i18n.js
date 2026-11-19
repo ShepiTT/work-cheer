@@ -63,6 +63,7 @@ const translations = {
     // Goal section
     goalLabel: '今日小目标',
     miniGoal: '小目标',
+    editGoal: '编辑目标',
     
     // Encouragements (returns [prefix, strong, suffix] for rendering)
     encourageRestDay: (name) => ['今天的任务：', '好好休息', '，快乐也很重要。'],
@@ -276,6 +277,7 @@ const translations = {
     // Goal section
     goalLabel: "Today's mini goal",
     miniGoal: 'Goal',
+    editGoal: 'Edit goal',
     
     // Encouragements (returns [prefix, strong, suffix] for rendering)
     encourageRestDay: (name) => ["Today's task: ", 'Rest well', '. Joy matters too.'],
@@ -399,7 +401,7 @@ const translations = {
     themeY2k: 'Y2K',
     themeY2kDesc: 'Gray windows, retro vibes',
     themeClay: 'Clay',
-    themeCyberDesc: 'Soft and squishy',
+    themeClayDesc: 'Soft and squishy',
     themeLcd: 'LCD',
     themeLcdDesc: 'Segment digits, like a meter',
     
