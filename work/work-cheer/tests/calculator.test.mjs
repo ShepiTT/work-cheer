@@ -595,3 +595,56 @@ test('old settings keep their countdown and allow schedules that have no lunch',
   assert.ok(validateSettings({ splitCountdown: true, breakStart: '13:00', breakEnd: '12:00' }).length);
   assert.ok(validateSettings({ splitCountdown: true, breakEnd: '19:00' }).length);
 });
+
+// Goal settings validation and progress tests
+test('goal name and amount validation', () => {
+  assert.deepEqual(validateSettings({ goalName: 'Coffee', goalAmount: 15 }), []);
+  assert.deepEqual(validateSettings({ goalName: '一场电影', goalAmount: 45 }), []);
+  assert.ok(validateSettings({ goalName: '', goalAmount: 45 }).length, 'empty goal name');
+  assert.ok(validateSettings({ goalName: '   ', goalAmount: 45 }).length, 'whitespace goal name');
+  assert.ok(validateSettings({ goalName: 'Coffee', goalAmount: 0 }).length, 'zero amount');
+  assert.ok(validateSettings({ goalName: 'Coffee', goalAmount: -10 }).length, 'negative amount');
+  assert.ok(validateSettings({ goalName: 'Coffee', goalAmount: NaN }).length, 'NaN amount');
+  assert.ok(validateSettings({ goalName: 'Coffee', goalAmount: Infinity }).length, 'Infinity amount');
+});
+
+test('goal progress calculation at various earnings levels', () => {
+  const settings = { goalAmount: 60 };
+  const half = calculate(settings, date('12:45:00'));
+  near(half.earned, 60);
+  const quarter = calculate(settings, date('10:37:30'));
+  near(quarter.earned, 30);
+  const full = calculate(settings, date('17:00:00'));
+  assert.equal(full.earned, 120);
+});
+
+test('goal settings do not affect salary or work time calculations', () => {
+  const baseStats = calculate({}, date('12:00:00'));
+  const goalStats = calculate({ goalName: 'Big Purchase', goalAmount: 1000 }, date('12:00:00'));
+  assert.equal(goalStats.earned, baseStats.earned);
+  assert.equal(goalStats.workedMs, baseStats.workedMs);
+  assert.equal(goalStats.totalMs, baseStats.totalMs);
+  assert.equal(goalStats.hourlyRate, baseStats.hourlyRate);
+  assert.equal(goalStats.dayTotal, baseStats.dayTotal);
+});
+
+test('zero earning rate does not cause calculation errors', () => {
+  const result = calculate({}, date('08:00:00'));
+  assert.equal(result.status, 'before');
+  assert.equal(result.earned, 0);
+  assert.ok(Number.isFinite(result.secondRate));
+});
+
+test('goal can be achieved mid-day', () => {
+  const settings = { goalAmount: 30 };
+  const earlyMorning = calculate(settings, date('09:30:00'));
+  const midMorning = calculate(settings, date('10:37:30'));
+  assert.ok(earlyMorning.earned < settings.goalAmount);
+  near(midMorning.earned, 30);
+});
+
+test('default goal values are present in DEFAULT_SETTINGS', () => {
+  assert.ok(DEFAULT_SETTINGS.goalName);
+  assert.ok(DEFAULT_SETTINGS.goalAmount > 0);
+  assert.ok(Number.isFinite(DEFAULT_SETTINGS.goalAmount));
+});
