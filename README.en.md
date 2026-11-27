@@ -138,7 +138,7 @@ For complete build steps and data formats, see [Developer Guide](docs/DEVELOPMEN
 
 ## License & Acknowledgments
 
-This project's code is licensed under the [MIT License](LICENSE). Third-party code, fonts, and runtimes distributed with the software follow their respective licenses; see [Third-Party Notices](THIRD_PARTY_NOTICES.md).
+This project's code is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE). Third-party code, fonts, and runtimes distributed with the software follow their respective licenses; see [Third-Party Notices](THIRD_PARTY_NOTICES.md).
 
 - [WizzenH/xindong](https://github.com/WizzenH/xindong): Reference for monthly salary calendar, themes, and desktop interactions; [MIT notice](work/work-cheer/public/licenses/xindong-MIT.txt) retained.
 - Noto Sans SC: Interface font and "励" (encourage) seal glyph; [SIL OFL 1.1](work/work-cheer/public/fonts/OFL.txt) retained.

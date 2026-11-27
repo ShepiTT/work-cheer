@@ -3,7 +3,7 @@
   "version": "1.13.0",
   "private": true,
   "description": "上班鼓励器：网页与 Windows 桌面版",
-  "license": "MIT",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "engines": {
     "node": ">=22"
   },
