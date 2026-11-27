@@ -138,7 +138,7 @@ docs/
 
 ## 许可与致谢
 
-本项目代码采用 [MIT License](LICENSE)。随软件分发的第三方代码、字体和运行时分别遵循各自许可，见[第三方许可说明](THIRD_PARTY_NOTICES.md)。
+本项目代码采用 [PolyForm Noncommercial License 1.0.0](LICENSE)。随软件分发的第三方代码、字体和运行时分别遵循各自许可，见[第三方许可说明](THIRD_PARTY_NOTICES.md)。
 
 - [WizzenH/xindong](https://github.com/WizzenH/xindong)：月薪日历、主题和桌面交互参考，保留 [MIT 声明](work/work-cheer/public/licenses/xindong-MIT.txt)。
 - Noto Sans SC：界面字体和“励”字印章字形，保留 [SIL OFL 1.1](work/work-cheer/public/fonts/OFL.txt)。

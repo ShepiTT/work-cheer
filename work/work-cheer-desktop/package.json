@@ -4,7 +4,7 @@
   "description": "上班鼓励器 Windows 桌面版：离线收入估算和下班倒计时",
   "main": "main.cjs",
   "author": "Work Cheer",
-  "license": "MIT",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "private": true,
   "scripts": {
     "prepare-app": "node prepare.cjs",
