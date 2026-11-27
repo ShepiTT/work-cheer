@@ -75,6 +75,9 @@ h1{font-size:17px;font-weight:650;letter-spacing:.06em;white-space:nowrap}
 .goal-name{display:flex;align-items:center;gap:5px;min-width:0;overflow:hidden;white-space:nowrap}
 .goal-name b{overflow:hidden;text-overflow:ellipsis;color:var(--text);font-weight:600}
 .goal-name svg{color:var(--accent-text)}
+.goal-edit{flex-shrink:0;display:flex;align-items:center;justify-content:center;width:22px;height:22px;margin-left:2px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;opacity:0;transition:opacity .15s,background .15s,color .15s}
+.goal:hover .goal-edit,.goal-edit:focus{opacity:1}
+.goal-edit:hover,.goal-edit:focus{background:var(--accent-soft);color:var(--accent-text)}
 .goal-amount{flex-shrink:0;font-variant-numeric:tabular-nums}
 .goal-track{height:4px;margin:10px 0 11px;overflow:hidden;border-radius:2px;background:var(--accent-soft)}
 .goal-track span{display:block;height:100%;background:var(--accent);transform:scaleX(var(--goal,0));transform-origin:left center;transition:transform .3s linear}
